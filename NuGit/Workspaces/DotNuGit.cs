@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using NuGit.Git;
 
-namespace NuGit
+namespace NuGit.Workspaces
 {
 
     /// <summary>
@@ -14,15 +15,15 @@ namespace NuGit
     {
 
         public DotNuGit()
-            : this(new DependencyInfo[0])
+            : this(new GitDependencyInfo[0])
         {
         }
 
 
-        public DotNuGit(IEnumerable<DependencyInfo> dependencies)
+        public DotNuGit(IEnumerable<GitDependencyInfo> dependencies)
         {
             if (dependencies == null) throw new ArgumentNullException("dependencies");
-            Dependencies = new ReadOnlyCollection<DependencyInfo>(dependencies.ToList());
+            Dependencies = new ReadOnlyCollection<GitDependencyInfo>(dependencies.ToList());
         }
 
 
@@ -30,7 +31,7 @@ namespace NuGit
         /// Other repositories required by this one
         /// </summary>
         ///
-        public IList<DependencyInfo> Dependencies
+        public IList<GitDependencyInfo> Dependencies
         {
             get;
             private set;

@@ -1,4 +1,6 @@
-﻿namespace NuGit
+﻿using NuGit.Git;
+
+namespace NuGit.Workspaces
 {
 
     /// <summary>
@@ -22,7 +24,7 @@
         /// <c>null</c> if no such repository exists
         /// </returns>
         ///
-        IRepository FindRepository(RepositoryName name);
+        IRepository FindRepository(GitRepositoryName name);
 
 
         /// <summary>

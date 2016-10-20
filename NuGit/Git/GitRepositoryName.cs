@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
-namespace NuGit
+namespace NuGit.Git
 {
 
     /// <summary>
@@ -12,8 +12,8 @@ namespace NuGit
     /// Case-insensitive
     /// </remarks>
     ///
-    public class RepositoryName
-        : IEquatable<RepositoryName>
+    public class GitRepositoryName
+        : IEquatable<GitRepositoryName>
     {
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace NuGit
             "CA1720:IdentifiersShouldNotContainTypeNames",
             MessageId = "string",
             Justification = "Don't care")]
-        public RepositoryName(string repositoryNameString)
+        public GitRepositoryName(string repositoryNameString)
         {
             if (repositoryNameString == null)
                 throw new ArgumentNullException("repositoryNameString");
@@ -51,7 +51,7 @@ namespace NuGit
         string _value;
 
 
-        public static implicit operator string(RepositoryName repositoryName)
+        public static implicit operator string(GitRepositoryName repositoryName)
         {
             if (repositoryName == null) return null;
             return repositoryName.ToString();
@@ -61,14 +61,14 @@ namespace NuGit
 
         #region IEquatable<RepositoryName>
 
-        public bool Equals(RepositoryName other)
+        public bool Equals(GitRepositoryName other)
         {
             if (other == null) return false;
             return ToString().Equals(other.ToString(), StringComparison.OrdinalIgnoreCase);
         }
 
 
-        public static bool operator==(RepositoryName oneName, RepositoryName anotherName)
+        public static bool operator==(GitRepositoryName oneName, GitRepositoryName anotherName)
         {
             if (object.ReferenceEquals(oneName, null) && object.ReferenceEquals(anotherName, null)) return true;
             if (object.ReferenceEquals(oneName, null) || object.ReferenceEquals(anotherName, null)) return false;
@@ -76,7 +76,7 @@ namespace NuGit
         }
 
 
-        public static bool operator!=(RepositoryName oneName, RepositoryName anotherName)
+        public static bool operator!=(GitRepositoryName oneName, GitRepositoryName anotherName)
         {
             return !(oneName == anotherName);
         }
@@ -101,7 +101,7 @@ namespace NuGit
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
-            return Equals(obj as RepositoryName);
+            return Equals(obj as GitRepositoryName);
         }
 
 

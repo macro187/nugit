@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using NuGit.Infrastructure;
+using NuGit.Git;
 
-namespace NuGit
+namespace NuGit.Workspaces
 {
 
     /// <summary>
@@ -33,8 +35,8 @@ namespace NuGit
                 repository.Workspace,
                 repository.GetDotNuGit().Dependencies,
                 repository,
-                new Dictionary<RepositoryName, GitCommitName>() { { repository.Name, new GitCommitName("HEAD") } },
-                new HashSet<RepositoryName>() { repository.Name }
+                new Dictionary<GitRepositoryName, GitCommitName>() { { repository.Name, new GitCommitName("HEAD") } },
+                new HashSet<GitRepositoryName>() { repository.Name }
                 );
         }
 
@@ -43,23 +45,23 @@ namespace NuGit
         /// Restore specified dependencies into a specified workspace
         /// </summary>
         ///
-        public static void Restore(IWorkspace workspace, IEnumerable<DependencyInfo> dependencies)
+        public static void Restore(IWorkspace workspace, IEnumerable<GitDependencyInfo> dependencies)
         {
             Restore(
                 workspace,
                 dependencies,
                 null,
-                new Dictionary<RepositoryName,GitCommitName>(),
-                new HashSet<RepositoryName>());
+                new Dictionary<GitRepositoryName,GitCommitName>(),
+                new HashSet<GitRepositoryName>());
         }
 
 
         static void Restore(
             IWorkspace workspace,
-            IEnumerable<DependencyInfo> dependencies,
+            IEnumerable<GitDependencyInfo> dependencies,
             IRepository requiredBy,
-            IDictionary<RepositoryName,GitCommitName> checkedOut,
-            ISet<RepositoryName> restored
+            IDictionary<GitRepositoryName,GitCommitName> checkedOut,
+            ISet<GitRepositoryName> restored
             )
         {
             if (workspace == null) throw new ArgumentNullException("workspace");

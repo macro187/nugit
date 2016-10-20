@@ -1,13 +1,13 @@
 ﻿using System;
 
-namespace NuGit
+namespace NuGit.Git
 {
 
     /// <summary>
     /// Reference to a specific commit in a specific Git repository
     /// </summary>
     ///
-    public class DependencyInfo
+    public class GitDependencyInfo
     {
 
         /// <summary>
@@ -20,7 +20,7 @@ namespace NuGit
         /// <paramref name="version"/> is <c>null</c>
         /// </exception>
         ///
-        public DependencyInfo(GitUrl url, GitCommitName version)
+        public GitDependencyInfo(GitUrl url, GitCommitName version)
         {
             if (url == null)
                 throw new ArgumentNullException("url");

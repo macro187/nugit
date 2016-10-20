@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Globalization;
+using NuGit.Infrastructure;
 
-namespace NuGit
+namespace NuGit.FileSystemWorkspaces
 {
 
     /// <summary>
@@ -17,7 +18,7 @@ namespace NuGit
         "CA2237:MarkISerializableTypesWithSerializable",
         Justification = "Only used internally so don't care")]
     public class DotNuGitParseException
-        : NuGitUserErrorException
+        : UserErrorException
     {
 
         public DotNuGitParseException(string description, int lineNumber, string line)

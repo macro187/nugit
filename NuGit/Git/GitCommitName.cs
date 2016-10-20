@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace NuGit
+namespace NuGit.Git
 {
 
     /// <summary>

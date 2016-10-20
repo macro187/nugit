@@ -1,4 +1,6 @@
-﻿namespace NuGit
+﻿using NuGit.Git;
+
+namespace NuGit.Workspaces
 {
 
     /// <summary>
@@ -19,7 +21,7 @@
         /// Name of the repository subdirectory
         /// </summary>
         ///
-        RepositoryName Name { get; }
+        GitRepositoryName Name { get; }
 
 
         /// <summary>

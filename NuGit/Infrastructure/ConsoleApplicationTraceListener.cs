@@ -1,30 +1,30 @@
 ﻿using System.Diagnostics;
 
-namespace NuGit
+namespace NuGit.Infrastructure
 {
 
     /// <summary>
-    /// A trace listener that outputs to <see cref="System.Console.Out"/> as appropriate for the NuGit program
+    /// A trace listener suitable for use as a console program's output mechanism
     /// </summary>
     ///
     /// <remarks>
     /// <para>
-    /// <see cref="Trace.WriteLine(string)"/> is output as-is.
+    /// <see cref="Trace.WriteLine(string)"/> is output to stdout as-is.
     /// </para>
     /// <para>
-    /// <see cref="Trace.TraceInformation(string)"/> is output as-is, if not <see cref="Quiet"/>.
+    /// <see cref="Trace.TraceInformation(string)"/> is output to stdout as-is, if not <see cref="Quiet"/>.
     /// </para>
     /// <para>
-    /// <see cref="Trace.TraceWarning(string)"/> and <see cref="Trace.TraceError(string)"/> are output in the format
-    /// <c>[&lt;severity&gt;] &lt;message&gt;</c>.
+    /// <see cref="Trace.TraceWarning(string)"/> and <see cref="Trace.TraceError(string)"/> are output to stdout in the
+    /// format <c>[&lt;severity&gt;] &lt;message&gt;</c>.
     /// </para>
     /// </remarks>
     ///
-    public class NuGitTraceListener
+    public class ConsoleApplicationTraceListener
         : ConsoleTraceListener
     {
 
-        public NuGitTraceListener()
+        public ConsoleApplicationTraceListener()
             : base()
         {
             Quiet = false;

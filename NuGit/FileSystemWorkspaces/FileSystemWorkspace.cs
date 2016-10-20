@@ -1,11 +1,14 @@
 ﻿using System;
 using System.IO;
+using NuGit.Infrastructure;
+using NuGit.Git;
+using NuGit.Workspaces;
 
-namespace NuGit
+namespace NuGit.FileSystemWorkspaces
 {
 
     /// <inheritdoc/>
-    public class Workspace
+    public class FileSystemWorkspace
         : IWorkspace
     {
 
@@ -23,7 +26,7 @@ namespace NuGit
         /// <c>null</c> if the path is not in a workspace
         /// </returns>
         ///
-        public static Workspace LocateFrom(string containedPath)
+        public static FileSystemWorkspace LocateFrom(string containedPath)
         {
             if (containedPath == null) throw new ArgumentNullException("containedPath");
 
@@ -32,7 +35,7 @@ namespace NuGit
             {
                 string parent = Path.GetDirectoryName(path);
                 if (parent == path) break;
-                if (Directory.Exists(Path.Combine(path, ".git"))) return new Workspace(parent);
+                if (Directory.Exists(Path.Combine(path, ".git"))) return new FileSystemWorkspace(parent);
                 path = parent;
             }
             return null;
@@ -47,7 +50,7 @@ namespace NuGit
         /// Path to the workspace's root directory
         /// </param>
         ///
-        public Workspace(string rootPath)
+        public FileSystemWorkspace(string rootPath)
         {
             if (rootPath == null) throw new ArgumentNullException("rootPath");
             if (!Directory.Exists(rootPath)) throw new ArgumentException("Not a directory", "rootPath");
@@ -68,7 +71,7 @@ namespace NuGit
 
 
         /// <inheritdoc/>
-        public IRepository FindRepository(RepositoryName name)
+        public IRepository FindRepository(GitRepositoryName name)
         {
             if (name == null) throw new ArgumentNullException("name");
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Blank", "name");
@@ -76,7 +79,7 @@ namespace NuGit
             if (!Directory.Exists(Path.Combine(RootPath, name))) return null;
 
             // TODO Cache
-            return new Repository(this, name);
+            return new FileSystemRepository(this, name);
         }
 
 
@@ -86,7 +89,7 @@ namespace NuGit
             if (gitUrl == null) throw new ArgumentNullException("gitUrl");
 
             if (ProcessExtensions.Invoke("git", "-C", RootPath, "clone", gitUrl) != 0)
-                throw new NuGitUserErrorException("git clone failed");
+                throw new UserErrorException("git clone failed");
 
             return FindRepository(gitUrl.RepositoryName);
         }

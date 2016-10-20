@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NuGit
+namespace NuGit.Infrastructure
 {
 
     /// <summary>
@@ -19,23 +19,23 @@ namespace NuGit
         "Microsoft.Design",
         "CA1032:ImplementStandardExceptionConstructors",
         Justification = "Internal use only, so don't care")]
-    public class NuGitUserErrorException
+    public class UserErrorException
         : Exception
     {
 
-        public NuGitUserErrorException(string message, Exception innerException)
+        public UserErrorException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
 
 
-        public NuGitUserErrorException(string message)
+        public UserErrorException(string message)
             : base(message)
         {
         }
 
 
-        public NuGitUserErrorException()
+        public UserErrorException()
             : base()
         {
         }

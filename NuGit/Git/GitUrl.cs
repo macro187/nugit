@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 
-namespace NuGit
+namespace NuGit.Git
 {
 
     /// <summary>
@@ -71,7 +71,7 @@ namespace NuGit
             if (Query != "")
                 throw new FormatException("Query components are not permitted in Git URLs");
 
-            RepositoryName = new RepositoryName(Path.GetFileNameWithoutExtension(AbsolutePath));
+            RepositoryName = new GitRepositoryName(Path.GetFileNameWithoutExtension(AbsolutePath));
 
             Commit = null;
             if (Fragment.Length > 1)
@@ -85,7 +85,7 @@ namespace NuGit
         /// The final path component, minus any filename extension
         /// </summary>
         ///
-        public RepositoryName RepositoryName
+        public GitRepositoryName RepositoryName
         {
             get;
             private set;

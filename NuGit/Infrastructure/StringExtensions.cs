@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace NuGit
+namespace NuGit.Infrastructure
 {
 
     public static class StringExtensions

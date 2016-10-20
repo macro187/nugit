@@ -1,18 +1,21 @@
 ﻿using System;
 using System.IO;
+using NuGit.Infrastructure;
+using NuGit.Git;
+using NuGit.Workspaces;
 
-namespace NuGit
+namespace NuGit.FileSystemWorkspaces
 {
 
     /// <summary>
     /// A repository directory
     /// </summary>
     ///
-    public class Repository
+    public class FileSystemRepository
         : IRepository
     {
 
-        internal Repository(Workspace workspace, RepositoryName name)
+        internal FileSystemRepository(FileSystemWorkspace workspace, GitRepositoryName name)
         {
             if (workspace == null) throw new ArgumentNullException("workspace");
             if (name == null) throw new ArgumentNullException("name");
@@ -22,7 +25,7 @@ namespace NuGit
         }
 
 
-        readonly Workspace _workspace;
+        readonly FileSystemWorkspace _workspace;
 
 
         readonly string _rootPath;
@@ -36,7 +39,7 @@ namespace NuGit
 
 
         /// <inheritdoc/>
-        public RepositoryName Name
+        public GitRepositoryName Name
         {
             get;
             private set;
@@ -48,7 +51,7 @@ namespace NuGit
         {
             // TODO If uncommitted changes, error
             if (ProcessExtensions.Invoke("git", "-C", _rootPath, "checkout", commit) != 0)
-                throw new NuGitUserErrorException("git checkout failed");
+                throw new UserErrorException("git checkout failed");
         }
 
 

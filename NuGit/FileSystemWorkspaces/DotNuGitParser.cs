@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using NuGit.Git;
+using NuGit.Workspaces;
 
-namespace NuGit
+namespace NuGit.FileSystemWorkspaces
 {
 
     /// <summary>
@@ -15,7 +17,7 @@ namespace NuGit
         {
             if (lines == null) throw new ArgumentNullException("lines");
 
-            var dependencies = new List<DependencyInfo>();
+            var dependencies = new List<GitDependencyInfo>();
 
             int lineNumber = 0;
             foreach (string line in lines)
@@ -49,7 +51,7 @@ namespace NuGit
                         fe);
                 }
 
-                dependencies.Add(new DependencyInfo(url, url.Commit ?? new GitCommitName("master")));
+                dependencies.Add(new GitDependencyInfo(url, url.Commit ?? new GitCommitName("master")));
             }
 
             return new DotNuGit(dependencies);

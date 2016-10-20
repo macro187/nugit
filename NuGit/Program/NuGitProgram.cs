@@ -4,16 +4,20 @@ using System.Linq;
 using System;
 using System.IO;
 using System.Reflection;
+using NuGit.Infrastructure;
+using NuGit.Git;
+using NuGit.Workspaces;
+using NuGit.FileSystemWorkspaces;
 
 namespace NuGit
 {
 
-    static class Program
+    static class NuGitProgram
     {
 
         static int Main(string[] argArray)
         {
-            var traceListener = new NuGitTraceListener();
+            var traceListener = new ConsoleApplicationTraceListener();
             Trace.Listeners.Add(traceListener);
             try
             {
@@ -32,7 +36,7 @@ namespace NuGit
                             break;
                         default:
                             Usage();
-                            throw new NuGitUserErrorException("Unrecognised switch '" + swch + "'"); 
+                            throw new UserErrorException("Unrecognised switch '" + swch + "'"); 
                     }
                 }
 
@@ -47,7 +51,7 @@ namespace NuGit
                 if (!args.Any())
                 {
                     Usage();
-                    throw new NuGitUserErrorException("No <command> specified");
+                    throw new UserErrorException("No <command> specified");
                 }
                 string command = args.Dequeue();
 
@@ -64,14 +68,14 @@ namespace NuGit
                         return Clone(args);
                     default:
                         Usage();
-                        throw new NuGitUserErrorException("Unrecognised <command>");
+                        throw new UserErrorException("Unrecognised <command>");
                 }
             }
 
             //
             // An expected user-facing error occurred
             //
-            catch (NuGitUserErrorException ue)
+            catch (UserErrorException ue)
             {
                 Trace.WriteLine("");
                 Trace.TraceError(ue.Message);
@@ -161,7 +165,7 @@ namespace NuGit
         static int Help(Queue<string> args)
         {
             Usage();
-            if (args.Any()) throw new NuGitUserErrorException("Too many arguments");
+            if (args.Any()) throw new UserErrorException("Too many arguments");
             return 0;
         }
 
@@ -172,9 +176,9 @@ namespace NuGit
         ///
         static int Restore(Queue<string> args)
         {
-            if (args.Any()) throw new NuGitUserErrorException("Too many arguments");
+            if (args.Any()) throw new UserErrorException("Too many arguments");
             var repository = WhereAmI();
-            if (repository == null) throw new NuGitUserErrorException("Not in a repository");
+            if (repository == null) throw new UserErrorException("Not in a repository");
 
             Restorer.Restore(repository);
 
@@ -188,18 +192,18 @@ namespace NuGit
         ///
         static int Clone(Queue<string> args)
         {
-            if (!args.Any()) throw new NuGitUserErrorException("Expected <url>");
+            if (!args.Any()) throw new UserErrorException("Expected <url>");
             var url = new GitUrl(args.Dequeue());
             var version = new GitCommitName(args.Any() ? args.Dequeue() : "master");
-            if (args.Any()) throw new NuGitUserErrorException("Too many arguments");
+            if (args.Any()) throw new UserErrorException("Too many arguments");
 
             var repository = WhereAmI();
             var workspace =
                 repository != null
                     ? repository.Workspace
-                    : new Workspace(Environment.CurrentDirectory);
+                    : new FileSystemWorkspace(Environment.CurrentDirectory);
 
-            Restorer.Restore(workspace, new DependencyInfo[] { new DependencyInfo(url, version) });
+            Restorer.Restore(workspace, new GitDependencyInfo[] { new GitDependencyInfo(url, version) });
 
             return 0;
         }
@@ -224,7 +228,7 @@ namespace NuGit
                 if (Directory.Exists(Path.Combine(dir.FullName, ".git"))) break;
                 dir = dir.Parent;
             }
-            return new Workspace(dir.Parent.FullName).FindRepository(new RepositoryName(dir.Name));
+            return new FileSystemWorkspace(dir.Parent.FullName).FindRepository(new GitRepositoryName(dir.Name));
         }
 
     }

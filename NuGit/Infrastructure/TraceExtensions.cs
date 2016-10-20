@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace NuGit
+namespace NuGit.Infrastructure
 {
 
     public static class TraceExtensions
