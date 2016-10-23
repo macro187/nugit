@@ -219,7 +219,7 @@ namespace NuGit
         /// <c>null</c> if it is not in a repository
         /// </returns>
         ///
-        static IRepository WhereAmI()
+        static FileSystemRepository WhereAmI()
         {
             var dir = new DirectoryInfo(Environment.CurrentDirectory);
             while (true)

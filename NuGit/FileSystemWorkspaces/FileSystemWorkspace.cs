@@ -71,7 +71,13 @@ namespace NuGit.FileSystemWorkspaces
 
 
         /// <inheritdoc/>
-        public IRepository FindRepository(GitRepositoryName name)
+        IRepository IWorkspace.FindRepository(GitRepositoryName name)
+        {
+            return FindRepository(name);
+        }
+
+
+        public FileSystemRepository FindRepository(GitRepositoryName name)
         {
             if (name == null) throw new ArgumentNullException("name");
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Blank", "name");
@@ -84,6 +90,12 @@ namespace NuGit.FileSystemWorkspaces
 
 
         /// <inheritdoc/>
+        IRepository IWorkspace.CloneRepository(GitUrl gitUrl)
+        {
+            return CloneRepository(gitUrl);
+        }
+
+
         public IRepository CloneRepository(GitUrl gitUrl)
         {
             if (gitUrl == null) throw new ArgumentNullException("gitUrl");
