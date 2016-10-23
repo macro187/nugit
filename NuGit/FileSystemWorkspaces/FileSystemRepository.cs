@@ -21,14 +21,18 @@ namespace NuGit.FileSystemWorkspaces
             if (name == null) throw new ArgumentNullException("name");
             _workspace = workspace;
             Name = name;
-            _rootPath = Path.Combine(workspace.RootPath, name);
+            RootPath = Path.Combine(workspace.RootPath, name);
         }
 
 
         readonly FileSystemWorkspace _workspace;
 
 
-        readonly string _rootPath;
+        public string RootPath
+        {
+            get;
+            private set;
+        }
 
 
         /// <inheritdoc/>
@@ -50,7 +54,7 @@ namespace NuGit.FileSystemWorkspaces
         public void Checkout(GitCommitName commit)
         {
             // TODO If uncommitted changes, error
-            if (ProcessExtensions.Invoke("git", "-C", _rootPath, "checkout", commit) != 0)
+            if (ProcessExtensions.Invoke("git", "-C", RootPath, "checkout", commit) != 0)
                 throw new UserErrorException("git checkout failed");
         }
 
@@ -58,7 +62,7 @@ namespace NuGit.FileSystemWorkspaces
         /// <inheritdoc/>
         public DotNuGit GetDotNuGit()
         {
-            string path = Path.Combine(_rootPath, ".nugit");
+            string path = Path.Combine(RootPath, ".nugit");
             if (!File.Exists(path)) return new DotNuGit();
             try
             {
