@@ -8,6 +8,7 @@ using NuGit.Infrastructure;
 using NuGit.Git;
 using NuGit.Workspaces;
 using NuGit.FileSystemWorkspaces;
+using NuGit.VisualStudio;
 
 namespace NuGit
 {
@@ -66,6 +67,8 @@ namespace NuGit
                         return Restore(args);
                     case "CLONE":
                         return Clone(args);
+                    case "INSTALL":
+                        return Install(args);
                     default:
                         Usage();
                         throw new UserErrorException("Unrecognised <command>");
@@ -155,6 +158,9 @@ namespace NuGit
             Trace.WriteLine("");
             Trace.WriteLine("    <version>");
             Trace.WriteLine("      Commit to use (default master)");
+            Trace.WriteLine("");
+            Trace.WriteLine("  install");
+            Trace.WriteLine("    (Re)install dependencies into current repository's Visual Studio solution");
         }
 
 
@@ -205,6 +211,35 @@ namespace NuGit
 
             Restorer.Restore(workspace, new GitDependencyInfo[] { new GitDependencyInfo(url, version) });
 
+            return 0;
+        }
+
+
+        /// <summary>
+        /// The <c>install</c> command
+        /// </summary>
+        ///
+        static int Install(Queue<string> args)
+        {
+            if (args.Any()) throw new UserErrorException("Too many arguments");
+            var repository = WhereAmI();
+            if (repository == null) throw new UserErrorException("Not in a repository");
+            var slnFiles = Directory.GetFiles(repository.RootPath, "*.sln");
+            if (slnFiles.Length == 0)
+            {
+                Trace.TraceWarning("No .sln file(s) found in current repository, doing nothing");
+                return 0;
+            }
+            if (slnFiles.Length > 1)
+            {
+                throw new UserErrorException("More than one .sln file found in current repository");
+            }
+            var slnFile = slnFiles[0];
+            var solution = new VisualStudioSolution(File.ReadLines(slnFile));
+            foreach (var r in solution.ProjectReferences)
+            {
+                Trace.TraceInformation(r.ToString());
+            }
             return 0;
         }
 
