@@ -235,7 +235,16 @@ namespace NuGit
                 throw new UserErrorException("More than one .sln file found in current repository");
             }
             var slnFile = slnFiles[0];
-            var solution = new VisualStudioSolution(File.ReadLines(slnFile));
+            VisualStudioSolution solution;
+            try
+            {
+                solution = new VisualStudioSolution(File.ReadLines(slnFile));
+            }
+            catch (FileParseException fpe)
+            {
+                fpe.Path = slnFile;
+                throw;
+            }
             foreach (var r in solution.ProjectReferences)
             {
                 Trace.TraceInformation(r.ToString());
