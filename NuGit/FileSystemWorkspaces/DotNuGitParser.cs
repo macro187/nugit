@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using NuGit.Git;
+using NuGit.Infrastructure;
 using NuGit.Workspaces;
 
 namespace NuGit.FileSystemWorkspaces
@@ -44,7 +45,7 @@ namespace NuGit.FileSystemWorkspaces
                 }
                 catch (FormatException fe)
                 {
-                    throw new DotNuGitParseException(
+                    throw new FileParseException(
                         "Invalid Git repository URL: " + fe.Message,
                         lineNumber,
                         line,

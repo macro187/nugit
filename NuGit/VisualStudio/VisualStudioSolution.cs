@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using NuGit.Infrastructure;
 
 namespace NuGit.VisualStudio
 {
@@ -81,7 +82,7 @@ namespace NuGit.VisualStudio
                 if (match.Success)
                 {
                     if (startLine != 0)
-                        throw new VisualStudioParseException(
+                        throw new FileParseException(
                             "Expected 'EndProject'",
                             lineNumber,
                             line);

@@ -68,7 +68,7 @@ namespace NuGit.FileSystemWorkspaces
             {
                 return DotNuGitParser.Parse(File.ReadLines(path));
             }
-            catch (DotNuGitParseException e)
+            catch (FileParseException e)
             {
                 e.Path = path;
                 throw;

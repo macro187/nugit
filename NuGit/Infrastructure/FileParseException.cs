@@ -2,11 +2,11 @@
 using System.Globalization;
 using NuGit.Infrastructure;
 
-namespace NuGit.VisualStudio
+namespace NuGit.Infrastructure
 {
 
     /// <summary>
-    /// An error occurred parsing a Visual Studio file
+    /// An error occurred parsing a file
     /// </summary>
     ///
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -17,22 +17,17 @@ namespace NuGit.VisualStudio
         "Microsoft.Usage",
         "CA2237:MarkISerializableTypesWithSerializable",
         Justification = "Only used internally so don't care")]
-    public class VisualStudioParseException
+    public class FileParseException
         : UserErrorException
     {
 
-        public VisualStudioParseException(string description, int lineNumber, string line)
+        public FileParseException(string description, int lineNumber, string line)
             : this(description, lineNumber, line, null)
         {
         }
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Naming",
-            "CA2204:Literals should be spelled correctly",
-            MessageId = "nugit",
-            Justification = ".nugit is spelled correctly")]
-        public VisualStudioParseException(string description, int lineNumber, string line, Exception innerException)
+        public FileParseException(string description, int lineNumber, string line, Exception innerException)
             : base("", innerException)
         {
             if (description == null) throw new ArgumentNullException("description");
@@ -49,7 +44,7 @@ namespace NuGit.VisualStudio
 
 
         /// <summary>
-        /// User-facing description of the parse error, if one occurred, otherwise an empty string
+        /// User-facing description of the parse error
         /// </summary>
         ///
         public string Description
@@ -60,7 +55,7 @@ namespace NuGit.VisualStudio
 
 
         /// <summary>
-        /// Path to the Visual Studio file
+        /// Path to the file being parsed
         /// </summary>
         ///
         public string Path
@@ -97,13 +92,14 @@ namespace NuGit.VisualStudio
         {
             get
             {
-                return StringExtensions.FormatInvariant(
+                return string.Format(
+                    CultureInfo.InvariantCulture,
                     "Error in {2} on line {3}{0}" +
                     "  {1}{0}" +
                     "  {4}",
                     Environment.NewLine,
                     Description,
-                    Path,
+                    string.IsNullOrWhiteSpace(Path) ? ".nugit" : Path,
                     LineNumber,
                     Line);
             }

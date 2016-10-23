@@ -61,11 +61,10 @@
   <ItemGroup>
     <Compile Include="Infrastructure\TraceExtensions.cs" />
     <Compile Include="Git\GitDependencyInfo.cs" />
-    <Compile Include="VisualStudio\VisualStudioParseException.cs" />
     <Compile Include="VisualStudio\VisualStudioProjectReference.cs" />
     <Compile Include="VisualStudio\VisualStudioSolution.cs" />
     <Compile Include="Workspaces\DotNuGit.cs" />
-    <Compile Include="FileSystemWorkspaces\DotNuGitParseException.cs" />
+    <Compile Include="Infrastructure\FileParseException.cs" />
     <Compile Include="FileSystemWorkspaces\DotNuGitParser.cs" />
     <Compile Include="Git\GitCommitName.cs" />
     <Compile Include="Git\GitUrl.cs" />
