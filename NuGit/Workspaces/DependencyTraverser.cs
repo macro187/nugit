@@ -27,7 +27,19 @@ namespace NuGit.Workspaces
     ///
     public static class DependencyTraverser
     {
+
+        /// <summary>
+        /// Get a list of a repository's full dependency graph in breadth-first order
+        /// </summary>
+        ///
+        public static IList<GitRepositoryName> GetAllDependencies(IRepository repository)
+        {
+            var names = new List<GitRepositoryName>();
+            Traverse(repository, name => names.Add(name));
+            return names;
+        }
         
+
         /// <summary>
         /// Traverse a repository's dependencies
         /// </summary>

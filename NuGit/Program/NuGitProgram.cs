@@ -226,6 +226,12 @@ namespace NuGit
             var repository = WhereAmI();
             if (repository == null) throw new UserErrorException("Not in a repository");
 
+            foreach (var name in DependencyTraverser.GetAllDependencies(repository))
+            {
+                Trace.TraceInformation(name);
+            }
+
+            /*
             var slnFiles = Directory.GetFiles(repository.RootPath, "*.sln");
             if (slnFiles.Length == 0)
             {
@@ -237,6 +243,7 @@ namespace NuGit
                 throw new UserErrorException("More than one .sln file found in current repository");
             }
             var slnFile = slnFiles[0];
+
             VisualStudioSolution solution;
             try
             {
@@ -247,10 +254,13 @@ namespace NuGit
                 fpe.Path = slnFile;
                 throw;
             }
+
             foreach (var r in solution.ProjectReferences)
             {
                 Trace.TraceInformation(r.ToString());
             }
+            */
+
             return 0;
         }
 
