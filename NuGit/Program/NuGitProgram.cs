@@ -186,7 +186,7 @@ namespace NuGit
             var repository = WhereAmI();
             if (repository == null) throw new UserErrorException("Not in a repository");
 
-            Restorer.Restore(repository);
+            DependencyTraverser.Traverse(repository);
 
             return 0;
         }
@@ -209,7 +209,7 @@ namespace NuGit
                     ? repository.Workspace
                     : new FileSystemWorkspace(Environment.CurrentDirectory);
 
-            Restorer.Restore(workspace, new GitDependencyInfo[] { new GitDependencyInfo(url, version) });
+            DependencyTraverser.Traverse(workspace, new GitDependencyInfo[] { new GitDependencyInfo(url, version) });
 
             return 0;
         }
@@ -222,8 +222,10 @@ namespace NuGit
         static int Install(Queue<string> args)
         {
             if (args.Any()) throw new UserErrorException("Too many arguments");
+
             var repository = WhereAmI();
             if (repository == null) throw new UserErrorException("Not in a repository");
+
             var slnFiles = Directory.GetFiles(repository.RootPath, "*.sln");
             if (slnFiles.Length == 0)
             {

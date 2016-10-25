@@ -8,66 +8,117 @@ namespace NuGit.Workspaces
 {
 
     /// <summary>
-    /// Dependency resolution algorithm
+    /// Dependency traversal algorithm
     /// </summary>
     ///
     /// <remarks>
     /// <para>
-    /// Recursively clones and checks out required versions of required repositories.
+    /// Traverses the graph of required repositories breadth-first.
     /// </para>
     /// <para>
-    /// Processes dependencies recursively breadth-first.  First-encountered (or "shallowest") version of a given
-    /// dependency wins.  Subsequent encounters for a different version of the same dependency produce a warning.
+    /// Clones (when necessary) and checks out specified version of repositories as they are encountered.
+    /// </para>
+    /// <para>
+    /// For a given repository, the version specified in the first-encountered (or "shallowest") dependency is used.
+    /// No action is taken for subsequently-encountered dependencies on the same version, however warnings are produced
+    /// for subsequently-encountered dependencies on different versions.
     /// </para>
     /// </remarks>
     ///
-    public static class Restorer
+    public static class DependencyTraverser
     {
         
         /// <summary>
-        /// Restore a repository's dependencies into its workspace
+        /// Traverse a repository's dependencies
         /// </summary>
         ///
-        public static void Restore(IRepository repository)
+        public static void Traverse(IRepository repository)
+        {
+            Traverse(repository, name => {});
+        }
+
+
+        /// <summary>
+        /// Traverse a repository's dependencies, performing an action as each is visited
+        /// </summary>
+        ///
+        /// <remarks>
+        /// Each dependency is visited exactly once.
+        /// </remarks>
+        ///
+        /// <param name="onVisited">
+        /// An action to invoke for each repository encountered during the descent through the dependency graph, at
+        /// which time the correct version of the repository itself will be available but its transitive dependencies
+        /// will not
+        /// </param>
+        ///
+        public static void Traverse(IRepository repository, Action<GitRepositoryName> onVisited)
         {
             if (repository == null) throw new ArgumentNullException("repository");
-            Restore(
+            Traverse(
                 repository.Workspace,
                 repository.GetDotNuGit().Dependencies,
                 repository,
                 new Dictionary<GitRepositoryName, GitCommitName>() { { repository.Name, new GitCommitName("HEAD") } },
-                new HashSet<GitRepositoryName>() { repository.Name }
+                new HashSet<GitRepositoryName>() { repository.Name },
+                onVisited
                 );
         }
 
 
         /// <summary>
-        /// Restore specified dependencies into a specified workspace
+        /// Traverse specified dependencies
         /// </summary>
         ///
-        public static void Restore(IWorkspace workspace, IEnumerable<GitDependencyInfo> dependencies)
+        public static void Traverse(IWorkspace workspace, IEnumerable<GitDependencyInfo> dependencies)
         {
-            Restore(
+            Traverse(workspace, dependencies, name => {});
+        }
+
+
+        /// <summary>
+        /// Traverse specified dependencies, performing an action as each is visited
+        /// </summary>
+        ///
+        /// <remarks>
+        /// Each dependency is visited exactly once.
+        /// </remarks>
+        ///
+        /// <param name="onVisited">
+        /// An action to invoke for each repository encountered during the descent through the dependency graph, at
+        /// which time the correct version of the repository itself will be available but its transitive dependencies
+        /// will not
+        /// </param>
+        ///
+        public static void Traverse(
+            IWorkspace workspace,
+            IEnumerable<GitDependencyInfo> dependencies,
+            Action<GitRepositoryName> onVisited)
+        {
+            Traverse(
                 workspace,
                 dependencies,
                 null,
                 new Dictionary<GitRepositoryName,GitCommitName>(),
-                new HashSet<GitRepositoryName>());
+                new HashSet<GitRepositoryName>(),
+                onVisited);
         }
 
 
-        static void Restore(
+        static void Traverse(
             IWorkspace workspace,
             IEnumerable<GitDependencyInfo> dependencies,
             IRepository requiredBy,
             IDictionary<GitRepositoryName,GitCommitName> checkedOut,
-            ISet<GitRepositoryName> restored
+            ISet<GitRepositoryName> visited,
+            Action<GitRepositoryName> onVisited
             )
         {
             if (workspace == null) throw new ArgumentNullException("workspace");
             if (dependencies == null) throw new ArgumentNullException("dependencies");
             if (checkedOut == null) throw new ArgumentNullException("checkedOut");
-            if (restored == null) throw new ArgumentNullException("restored");
+            if (visited == null) throw new ArgumentNullException("visited");
+            if (onVisited == null) throw new ArgumentNullException("onVisited");
 
             //
             // Clone dependencies that aren't present
@@ -113,22 +164,34 @@ namespace NuGit.Workspaces
             }
 
             //
+            // onVisited
+            //
+            foreach (var d in dependencies)
+            {
+                var name = d.Url.RepositoryName;
+                if (visited.Contains(name)) continue;
+
+                onVisited(name);
+            }
+
+            //
             // Recurse
             //
             foreach (var d in dependencies)
             {
                 var name = d.Url.RepositoryName;
                 var repo = workspace.FindRepository(name);
-                if (restored.Contains(name)) continue;
+                if (visited.Contains(name)) continue;
 
-                restored.Add(name);
+                visited.Add(name);
 
-                Restore(
+                Traverse(
                     workspace,
                     repo.GetDotNuGit().Dependencies,
                     repo,
                     checkedOut,
-                    restored);
+                    visited,
+                    onVisited);
             }
         }
 
