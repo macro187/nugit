@@ -57,7 +57,7 @@ namespace NuGit.VisualStudio
         public override string ToString()
         {
             return StringExtensions.FormatInvariant(
-                "{0}:{1}: Project(\"{2}\") = \"{3}\", \"{4}\", \"{5}\"",
+                "Line {0}:{1}: Project(\"{2}\") = \"{3}\", \"{4}\", \"{5}\"",
                 LineNumber, LineCount, TypeId, Name, Location, Id);
         }
 
