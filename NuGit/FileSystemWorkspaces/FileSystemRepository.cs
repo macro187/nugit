@@ -36,7 +36,13 @@ namespace NuGit.FileSystemWorkspaces
 
 
         /// <inheritdoc/>
-        public IWorkspace Workspace
+        IWorkspace IRepository.Workspace
+        {
+            get { return Workspace; }
+        }
+
+
+        public FileSystemWorkspace Workspace
         {
             get { return _workspace; }
         }
