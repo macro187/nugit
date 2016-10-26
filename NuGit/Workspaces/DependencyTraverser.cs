@@ -34,9 +34,12 @@ namespace NuGit.Workspaces
         ///
         public static IList<GitRepositoryName> GetAllDependencies(IRepository repository)
         {
-            var names = new List<GitRepositoryName>();
-            Traverse(repository, name => names.Add(name));
-            return names;
+            using (TraceExtensions.Step("Calculating dependencies"))
+            {
+                var names = new List<GitRepositoryName>();
+                Traverse(repository, name => names.Add(name));
+                return names;
+            }
         }
         
 
@@ -138,8 +141,10 @@ namespace NuGit.Workspaces
             foreach (var d in dependencies)
             {
                 if (workspace.FindRepository(d.Url.RepositoryName) != null) continue;
-                TraceExtensions.TraceHeading("Fetching " + d.Url.RepositoryName);
-                workspace.CloneRepository(d.Url);
+                using (TraceExtensions.Step("Cloning " + d.Url.RepositoryName))
+                {
+                    workspace.CloneRepository(d.Url);
+                }
             }
 
             //
@@ -170,8 +175,10 @@ namespace NuGit.Workspaces
                     continue;
                 }
 
-                TraceExtensions.TraceHeading("Switching " + name + " to " + commit);
-                workspace.FindRepository(name).Checkout(commit);
+                using (TraceExtensions.Step("Checking out " + name + " to " + commit))
+                {
+                    workspace.FindRepository(name).Checkout(commit);
+                }
                 checkedOut.Add(name, commit);
             }
 
