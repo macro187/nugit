@@ -96,28 +96,37 @@ namespace NuGit.VisualStudio
         void Load()
         {
             _projectReferences = new List<VisualStudioProjectReference>();
+            _nestedProjects = new List<VisualStudioNestedProject>();
 
             int lineNumber = 0;
-            int startLine = 0;
+            int projectReferenceStart = 0;
+            int nestedProjectsStart = 0;
             string id = "";
             string typeId = "";
             string name = "";
             string location = "";
+            Match match;
             foreach (var line in Lines)
             {
                 lineNumber++;
+                
+                //
+                // Ignore blank lines and comments
+                //
+                if (string.IsNullOrWhiteSpace(line)) continue;
+                if (line.Trim().StartsWith("#", StringComparison.Ordinal)) continue;
 
                 //
-                // In a project reference
+                // In a project reference block
                 //
-                if (startLine != 0)
+                if (projectReferenceStart != 0)
                 {
                     if (line.Trim() == "EndProject")
                     {
                         _projectReferences.Add(
                             new VisualStudioProjectReference(
-                                id, typeId, name, location, startLine, lineNumber - startLine + 1));
-                        startLine = 0;
+                                id, typeId, name, location, projectReferenceStart, lineNumber - projectReferenceStart + 1));
+                        projectReferenceStart = 0;
                         id = "";
                         typeId = "";
                         name = "";
@@ -127,21 +136,59 @@ namespace NuGit.VisualStudio
                 }
 
                 //
+                // In nested projects block
+                //
+                if (nestedProjectsStart != 0)
+                {
+                    if (line.Trim() == "EndGlobalSection")
+                    {
+                        nestedProjectsStart = 0;
+                        continue;
+                    }
+
+                    match = Regex.Match(line, "(\\S+) = (\\S+)");
+                    if (!match.Success)
+                        throw new FileParseException(
+                            "Expected '{guid} = {guid}'",
+                            lineNumber,
+                            line);
+
+                    _nestedProjects.Add(
+                        new VisualStudioNestedProject(
+                            match.Groups[1].Value,
+                            match.Groups[2].Value,
+                            lineNumber));
+
+                    continue;
+                }
+
+                //
                 // Starting a project reference
                 //
-                var match = Regex.Match(line, "Project\\(\"([^\"]*)\"\\) = \"([^\"]*)\", \"([^\"]*)\", \"([^\"]*)\"");
+                match = Regex.Match(line, "Project\\(\"([^\"]*)\"\\) = \"([^\"]*)\", \"([^\"]*)\", \"([^\"]*)\"");
                 if (match.Success)
                 {
-                    if (startLine != 0)
+                    if (projectReferenceStart != 0)
                         throw new FileParseException(
                             "Expected 'EndProject'",
                             lineNumber,
                             line);
-                    startLine = lineNumber;
+
+                    projectReferenceStart = lineNumber;
                     typeId = match.Groups[1].Value;
                     name = match.Groups[2].Value;
                     location = match.Groups[3].Value;
                     id = match.Groups[4].Value;
+
+                    continue;
+                }
+
+                //
+                // Starting nested projects block
+                //
+                if (line.Trim() == "GlobalSection(NestedProjects) = preSolution")
+                {
+                    nestedProjectsStart = lineNumber;
                     continue;
                 }
 
@@ -176,7 +223,7 @@ namespace NuGit.VisualStudio
 
 
         /// <summary>
-        /// All project references in the solution file
+        /// Project references in the solution file
         /// </summary>
         ///
         public IEnumerable<VisualStudioProjectReference> ProjectReferences
@@ -185,6 +232,18 @@ namespace NuGit.VisualStudio
         }
 
         IList<VisualStudioProjectReference> _projectReferences;
+
+
+        /// <summary>
+        /// Nested project entries in the solution file
+        /// </summary>
+        ///
+        public IEnumerable<VisualStudioNestedProject> NestedProjects
+        {
+            get { return _nestedProjects; }
+        }
+
+        IList<VisualStudioNestedProject> _nestedProjects;
 
     }
 

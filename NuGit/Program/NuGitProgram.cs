@@ -241,10 +241,18 @@ namespace NuGit
                         Trace.TraceInformation("No .sln");
                         continue;
                     }
+
                     Trace.TraceInformation("Project References:");
-                    foreach (var projRef in sln.ProjectReferences)
+                    foreach (var projectReference in sln.ProjectReferences)
                     {
-                        Trace.TraceInformation(projRef.ToString());
+                        Trace.TraceInformation(projectReference.ToString());
+                    }
+
+                    Trace.TraceInformation("");
+                    Trace.TraceInformation("Nested Projects:");
+                    foreach (var nestedProject in sln.NestedProjects)
+                    {
+                        Trace.TraceInformation(nestedProject.ToString());
                     }
                 }
             }

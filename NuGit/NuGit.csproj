@@ -61,6 +61,7 @@
   <ItemGroup>
     <Compile Include="Infrastructure\TraceExtensions.cs" />
     <Compile Include="Git\GitDependencyInfo.cs" />
+    <Compile Include="VisualStudio\VisualStudioNestedProject.cs" />
     <Compile Include="VisualStudio\VisualStudioProjectReference.cs" />
     <Compile Include="VisualStudio\VisualStudioSolution.cs" />
     <Compile Include="Workspaces\DotNuGit.cs" />
