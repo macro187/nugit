@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using NuGit.Infrastructure;
 
@@ -15,19 +17,68 @@ namespace NuGit.VisualStudio
     {
 
         /// <summary>
-        /// Initialise a new solution from the lines of text in the <c>.sln</c> file
+        /// Find a Visual Studio solution in a directory
         /// </summary>
         ///
-        public VisualStudioSolution(IEnumerable<string> lines)
+        /// <returns>
+        /// The solution
+        /// - OR -
+        /// <c>null</c> if the directory contained no solution
+        /// </returns>
+        ///
+        /// <exception cref="UserErrorException">
+        /// The directory contained more than one solution
+        /// </exception>
+        ///
+        public static VisualStudioSolution Find(string directoryPath)
         {
-            if (lines == null) throw new ArgumentNullException("lines");
-            _lines = lines.ToList();
-            Parse();
+            if (directoryPath == null) throw new ArgumentNullException("directoryPath");
+            if (!Directory.Exists(directoryPath))
+            {
+                throw new ArgumentException("Directory doesn't exist", "directoryPath");
+            }
+
+            var slnPaths = Directory.GetFiles(directoryPath, "*.sln");
+            if (slnPaths.Length == 0) return null;
+            if (slnPaths.Length > 1)
+            {
+                throw new UserErrorException(
+                    StringExtensions.FormatInvariant(
+                        "More than one .sln found in {0}",
+                        directoryPath));
+            }
+            var slnPath = slnPaths[0];
+
+            return new VisualStudioSolution(slnPath);
         }
 
 
         /// <summary>
-        /// The lines of text in the file
+        /// Load a solution from an <c>.sln</c> file
+        /// </summary>
+        ///
+        public VisualStudioSolution(string path)
+        {
+            if (path == null) throw new ArgumentNullException("path");
+            Path = path;
+            _lines = File.ReadLines(path).ToList();
+            Load();
+        }
+
+
+        /// <summary>
+        /// The location of the solution file
+        /// </summary>
+        ///
+        public string Path
+        {
+            get;
+            private set;
+        }
+
+
+        /// <summary>
+        /// Lines of text in the solution file
         /// </summary>
         ///
         public IEnumerable<string> Lines
@@ -39,10 +90,10 @@ namespace NuGit.VisualStudio
 
 
         /// <summary>
-        /// Parse information from file contents
+        /// Load information from .sln file
         /// </summary>
         ///
-        void Parse()
+        void Load()
         {
             _projectReferences = new List<VisualStudioProjectReference>();
 
@@ -101,6 +152,33 @@ namespace NuGit.VisualStudio
         }
 
 
+        /// <summary>
+        /// Save information to .sln file
+        /// </summary>
+        ///
+        public void Save()
+        {
+            //
+            // Visual Studio writes .sln files in UTF-8 with BOM and Windows-style line endings
+            //
+            var encoding = new UTF8Encoding(true);
+            var newline = "\r\n";
+
+            using (var f = new StreamWriter(Path, false, encoding))
+            {
+                f.NewLine = newline;
+                foreach (var line in Lines)
+                {
+                    f.WriteLine(line);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// All project references in the solution file
+        /// </summary>
+        ///
         public IEnumerable<VisualStudioProjectReference> ProjectReferences
         {
             get { return _projectReferences; }

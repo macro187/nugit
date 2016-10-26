@@ -226,40 +226,28 @@ namespace NuGit
             var repository = WhereAmI();
             if (repository == null) throw new UserErrorException("Not in a repository");
 
-            foreach (var name in DependencyTraverser.GetAllDependencies(repository))
-            {
-                Trace.TraceInformation(name);
-            }
+            var workspace = repository.Workspace;
 
-            /*
-            var slnFiles = Directory.GetFiles(repository.RootPath, "*.sln");
-            if (slnFiles.Length == 0)
-            {
-                Trace.TraceWarning("No .sln file(s) found in current repository, doing nothing");
-                return 0;
-            }
-            if (slnFiles.Length > 1)
-            {
-                throw new UserErrorException("More than one .sln file found in current repository");
-            }
-            var slnFile = slnFiles[0];
+            var dependencies = DependencyTraverser.GetAllDependencies(repository);
 
-            VisualStudioSolution solution;
-            try
+            foreach (var name in dependencies)
             {
-                solution = new VisualStudioSolution(File.ReadLines(slnFile));
+                using (TraceExtensions.Step(name))
+                {
+                    var repo = workspace.FindRepository(name);
+                    var sln = VisualStudioSolution.Find(repo.RootPath);
+                    if (sln == null)
+                    {
+                        Trace.TraceInformation("No .sln");
+                        continue;
+                    }
+                    Trace.TraceInformation("Project References:");
+                    foreach (var projRef in sln.ProjectReferences)
+                    {
+                        Trace.TraceInformation(projRef.ToString());
+                    }
+                }
             }
-            catch (FileParseException fpe)
-            {
-                fpe.Path = slnFile;
-                throw;
-            }
-
-            foreach (var r in solution.ProjectReferences)
-            {
-                Trace.TraceInformation(r.ToString());
-            }
-            */
 
             return 0;
         }
