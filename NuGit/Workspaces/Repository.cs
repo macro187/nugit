@@ -57,22 +57,6 @@ namespace NuGit.Workspaces
 
 
         /// <summary>
-        /// Switch the repository to a particular Git commit
-        /// </summary>
-        ///
-        /// <remarks>
-        /// Can affect the result of <see cref="GetDotNuGit()"/>.
-        /// </remarks>
-        ///
-        public void Checkout(GitCommitName commit)
-        {
-            // TODO If uncommitted changes, error
-            if (ProcessExtensions.Invoke("git", "-C", RootPath, "checkout", commit) != 0)
-                throw new UserErrorException("git checkout failed");
-        }
-
-
-        /// <summary>
         /// Get the repository's .nugit information
         /// </summary>
         ///

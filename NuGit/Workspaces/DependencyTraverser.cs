@@ -143,7 +143,7 @@ namespace NuGit.Workspaces
                 if (workspace.FindRepository(d.Url.RepositoryName) != null) continue;
                 using (TraceExtensions.Step("Cloning " + d.Url.RepositoryName))
                 {
-                    workspace.CloneRepository(d.Url);
+                    GitRepository.CloneRepository(workspace.RootPath, d.Url);
                 }
             }
 
@@ -177,7 +177,7 @@ namespace NuGit.Workspaces
 
                 using (TraceExtensions.Step("Checking out " + name + " to " + commit))
                 {
-                    workspace.FindRepository(name).Checkout(commit);
+                    GitRepository.Checkout(workspace.FindRepository(name).RootPath, commit);
                 }
                 checkedOut.Add(name, commit);
             }

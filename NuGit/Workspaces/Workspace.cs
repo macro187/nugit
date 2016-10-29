@@ -96,21 +96,6 @@ namespace NuGit.Workspaces
             return new Repository(this, name);
         }
 
-
-        /// <summary>
-        /// Clone a new repository into the workspace
-        /// </summary>
-        ///
-        public Repository CloneRepository(GitUrl gitUrl)
-        {
-            if (gitUrl == null) throw new ArgumentNullException("gitUrl");
-
-            if (ProcessExtensions.Invoke("git", "-C", RootPath, "clone", gitUrl) != 0)
-                throw new UserErrorException("git clone failed");
-
-            return FindRepository(gitUrl.RepositoryName);
-        }
-
     }
 
 }
