@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using NuGit.Git;
 using NuGit.Infrastructure;
-using NuGit.Workspaces;
 
-namespace NuGit.FileSystemWorkspaces
+namespace NuGit.Workspaces
 {
 
     /// <summary>

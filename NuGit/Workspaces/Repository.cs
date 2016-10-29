@@ -2,32 +2,31 @@
 using System.IO;
 using NuGit.Infrastructure;
 using NuGit.Git;
-using NuGit.Workspaces;
 
-namespace NuGit.FileSystemWorkspaces
+namespace NuGit.Workspaces
 {
 
     /// <summary>
-    /// A repository directory
+    /// A repository subdirectory
     /// </summary>
     ///
-    public class FileSystemRepository
-        : IRepository
+    public class Repository
     {
 
-        internal FileSystemRepository(FileSystemWorkspace workspace, GitRepositoryName name)
+        internal Repository(Workspace workspace, GitRepositoryName name)
         {
             if (workspace == null) throw new ArgumentNullException("workspace");
             if (name == null) throw new ArgumentNullException("name");
-            _workspace = workspace;
-            Name = name;
             RootPath = Path.Combine(workspace.RootPath, name);
+            Name = name;
+            Workspace = workspace;
         }
 
 
-        readonly FileSystemWorkspace _workspace;
-
-
+        /// <summary>
+        /// Full path to the repository's root directory
+        /// </summary>
+        ///
         public string RootPath
         {
             get;
@@ -35,20 +34,21 @@ namespace NuGit.FileSystemWorkspaces
         }
 
 
-        /// <inheritdoc/>
-        IWorkspace IRepository.Workspace
+        /// <summary>
+        /// Workspace the repository is in
+        /// </summary>
+        ///
+        public Workspace Workspace
         {
-            get { return Workspace; }
+            get;
+            private set;
         }
 
 
-        public FileSystemWorkspace Workspace
-        {
-            get { return _workspace; }
-        }
-
-
-        /// <inheritdoc/>
+        /// <summary>
+        /// Name of the repository subdirectory
+        /// </summary>
+        ///
         public GitRepositoryName Name
         {
             get;
@@ -56,7 +56,14 @@ namespace NuGit.FileSystemWorkspaces
         }
 
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Switch the repository to a particular Git commit
+        /// </summary>
+        ///
+        /// <remarks>
+        /// Can affect the result of <see cref="GetDotNuGit()"/>.
+        /// </remarks>
+        ///
         public void Checkout(GitCommitName commit)
         {
             // TODO If uncommitted changes, error
@@ -65,7 +72,18 @@ namespace NuGit.FileSystemWorkspaces
         }
 
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Get the repository's .nugit information
+        /// </summary>
+        ///
+        /// <remarks>
+        /// Result can be affected by <see cref="Checkout()"/>.
+        /// </remarks>
+        ///
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design",
+            "CA1024:UsePropertiesWhereAppropriate",
+            Justification = "Emphasise that information is reread on each call")]
         public DotNuGit GetDotNuGit()
         {
             string path = Path.Combine(RootPath, ".nugit");

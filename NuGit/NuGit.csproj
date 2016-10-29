@@ -66,22 +66,20 @@
     <Compile Include="VisualStudio\VisualStudioSolution.cs" />
     <Compile Include="Workspaces\DotNuGit.cs" />
     <Compile Include="Infrastructure\FileParseException.cs" />
-    <Compile Include="FileSystemWorkspaces\DotNuGitParser.cs" />
+    <Compile Include="Workspaces\DotNuGitParser.cs" />
     <Compile Include="Git\GitCommitName.cs" />
     <Compile Include="Git\GitUrl.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Workspaces\IRepository.cs" />
-    <Compile Include="Workspaces\IWorkspace.cs" />
     <Compile Include="Infrastructure\ConsoleApplicationTraceListener.cs" />
     <Compile Include="Infrastructure\UserErrorException.cs" />
     <Compile Include="Infrastructure\ProcessExtensions.cs" />
     <Compile Include="Program\NuGitProgram.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="FileSystemWorkspaces\FileSystemRepository.cs" />
+    <Compile Include="Workspaces\Repository.cs" />
     <Compile Include="Git\GitRepositoryName.cs" />
     <Compile Include="Workspaces\DependencyTraverser.cs" />
     <Compile Include="Infrastructure\StringExtensions.cs" />
-    <Compile Include="FileSystemWorkspaces\FileSystemWorkspace.cs" />
+    <Compile Include="Workspaces\Workspace.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="CodeAnalysisDictionary.xml" />

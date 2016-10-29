@@ -7,7 +7,6 @@ using System.Reflection;
 using NuGit.Infrastructure;
 using NuGit.Git;
 using NuGit.Workspaces;
-using NuGit.FileSystemWorkspaces;
 using NuGit.VisualStudio;
 
 namespace NuGit
@@ -207,7 +206,7 @@ namespace NuGit
             var workspace =
                 repository != null
                     ? repository.Workspace
-                    : new FileSystemWorkspace(Environment.CurrentDirectory);
+                    : new Workspace(Environment.CurrentDirectory);
 
             DependencyTraverser.Traverse(workspace, new GitDependencyInfo[] { new GitDependencyInfo(url, version) });
 
@@ -271,7 +270,7 @@ namespace NuGit
         /// <c>null</c> if it is not in a repository
         /// </returns>
         ///
-        static FileSystemRepository WhereAmI()
+        static Repository WhereAmI()
         {
             var dir = new DirectoryInfo(Environment.CurrentDirectory);
             while (true)
@@ -280,7 +279,7 @@ namespace NuGit
                 if (Directory.Exists(Path.Combine(dir.FullName, ".git"))) break;
                 dir = dir.Parent;
             }
-            return new FileSystemWorkspace(dir.Parent.FullName).FindRepository(new GitRepositoryName(dir.Name));
+            return new Workspace(dir.Parent.FullName).FindRepository(new GitRepositoryName(dir.Name));
         }
 
     }

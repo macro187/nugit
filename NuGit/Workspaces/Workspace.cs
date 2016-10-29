@@ -2,14 +2,15 @@
 using System.IO;
 using NuGit.Infrastructure;
 using NuGit.Git;
-using NuGit.Workspaces;
 
-namespace NuGit.FileSystemWorkspaces
+namespace NuGit.Workspaces
 {
 
-    /// <inheritdoc/>
-    public class FileSystemWorkspace
-        : IWorkspace
+    /// <summary>
+    /// A root directory that contains repository subdirectories
+    /// </summary>
+    ///
+    public class Workspace
     {
 
         /// <summary>
@@ -26,7 +27,7 @@ namespace NuGit.FileSystemWorkspaces
         /// <c>null</c> if the path is not in a workspace
         /// </returns>
         ///
-        public static FileSystemWorkspace LocateFrom(string containedPath)
+        public static Workspace LocateFrom(string containedPath)
         {
             if (containedPath == null) throw new ArgumentNullException("containedPath");
 
@@ -35,7 +36,7 @@ namespace NuGit.FileSystemWorkspaces
             {
                 string parent = Path.GetDirectoryName(path);
                 if (parent == path) break;
-                if (Directory.Exists(Path.Combine(path, ".git"))) return new FileSystemWorkspace(parent);
+                if (Directory.Exists(Path.Combine(path, ".git"))) return new Workspace(parent);
                 path = parent;
             }
             return null;
@@ -50,7 +51,7 @@ namespace NuGit.FileSystemWorkspaces
         /// Path to the workspace's root directory
         /// </param>
         ///
-        public FileSystemWorkspace(string rootPath)
+        public Workspace(string rootPath)
         {
             if (rootPath == null) throw new ArgumentNullException("rootPath");
             if (!Directory.Exists(rootPath)) throw new ArgumentException("Not a directory", "rootPath");
@@ -60,7 +61,7 @@ namespace NuGit.FileSystemWorkspaces
 
 
         /// <summary>
-        /// Full path to the workspace root directory
+        /// Full path to the workspace's root directory
         /// </summary>
         ///
         public string RootPath
@@ -70,14 +71,21 @@ namespace NuGit.FileSystemWorkspaces
         }
 
 
-        /// <inheritdoc/>
-        IRepository IWorkspace.FindRepository(GitRepositoryName name)
-        {
-            return FindRepository(name);
-        }
-
-
-        public FileSystemRepository FindRepository(GitRepositoryName name)
+        /// <summary>
+        /// Look for a repository in the workspace
+        /// </summary>
+        ///
+        /// <param name="name">
+        /// Name of the sought-after repository
+        /// </param>
+        ///
+        /// <returns>
+        /// The repository in the workspace named <paramref name="name"/>
+        /// - OR -
+        /// <c>null</c> if no such repository exists
+        /// </returns>
+        ///
+        public Repository FindRepository(GitRepositoryName name)
         {
             if (name == null) throw new ArgumentNullException("name");
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Blank", "name");
@@ -85,18 +93,15 @@ namespace NuGit.FileSystemWorkspaces
             if (!Directory.Exists(Path.Combine(RootPath, name))) return null;
 
             // TODO Cache
-            return new FileSystemRepository(this, name);
+            return new Repository(this, name);
         }
 
 
-        /// <inheritdoc/>
-        IRepository IWorkspace.CloneRepository(GitUrl gitUrl)
-        {
-            return CloneRepository(gitUrl);
-        }
-
-
-        public IRepository CloneRepository(GitUrl gitUrl)
+        /// <summary>
+        /// Clone a new repository into the workspace
+        /// </summary>
+        ///
+        public Repository CloneRepository(GitUrl gitUrl)
         {
             if (gitUrl == null) throw new ArgumentNullException("gitUrl");
 

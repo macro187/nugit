@@ -32,7 +32,7 @@ namespace NuGit.Workspaces
         /// Get a list of a repository's full dependency graph in breadth-first order
         /// </summary>
         ///
-        public static IList<GitRepositoryName> GetAllDependencies(IRepository repository)
+        public static IList<GitRepositoryName> GetAllDependencies(Repository repository)
         {
             using (TraceExtensions.Step("Calculating dependencies"))
             {
@@ -47,7 +47,7 @@ namespace NuGit.Workspaces
         /// Traverse a repository's dependencies
         /// </summary>
         ///
-        public static void Traverse(IRepository repository)
+        public static void Traverse(Repository repository)
         {
             Traverse(repository, name => {});
         }
@@ -67,7 +67,7 @@ namespace NuGit.Workspaces
         /// will not
         /// </param>
         ///
-        public static void Traverse(IRepository repository, Action<GitRepositoryName> onVisited)
+        public static void Traverse(Repository repository, Action<GitRepositoryName> onVisited)
         {
             if (repository == null) throw new ArgumentNullException("repository");
             Traverse(
@@ -85,7 +85,7 @@ namespace NuGit.Workspaces
         /// Traverse specified dependencies
         /// </summary>
         ///
-        public static void Traverse(IWorkspace workspace, IEnumerable<GitDependencyInfo> dependencies)
+        public static void Traverse(Workspace workspace, IEnumerable<GitDependencyInfo> dependencies)
         {
             Traverse(workspace, dependencies, name => {});
         }
@@ -106,7 +106,7 @@ namespace NuGit.Workspaces
         /// </param>
         ///
         public static void Traverse(
-            IWorkspace workspace,
+            Workspace workspace,
             IEnumerable<GitDependencyInfo> dependencies,
             Action<GitRepositoryName> onVisited)
         {
@@ -121,9 +121,9 @@ namespace NuGit.Workspaces
 
 
         static void Traverse(
-            IWorkspace workspace,
+            Workspace workspace,
             IEnumerable<GitDependencyInfo> dependencies,
-            IRepository requiredBy,
+            Repository requiredBy,
             IDictionary<GitRepositoryName,GitCommitName> checkedOut,
             ISet<GitRepositoryName> visited,
             Action<GitRepositoryName> onVisited
