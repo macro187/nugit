@@ -10,14 +10,19 @@ namespace NuGit.VisualStudio
 {
 
     /// <summary>
-    /// Information in a Visual Studio solution file
+    /// A Visual Studio solution (<c>.sln</c>) file
     /// </summary>
+    ///
+    /// <remarks>
+    /// This class contains the entire contents of the file, and can interpret and modify some parts of it without
+    /// disturbing the others.
+    /// </remarks>
     ///
     public class VisualStudioSolution
     {
 
         /// <summary>
-        /// Find a Visual Studio solution in a directory
+        /// Find and load the solution in a directory
         /// </summary>
         ///
         /// <returns>
@@ -54,8 +59,12 @@ namespace NuGit.VisualStudio
 
 
         /// <summary>
-        /// Load a solution from an <c>.sln</c> file
+        /// Load a solution from a <c>.sln</c> file
         /// </summary>
+        ///
+        /// <remarks>
+        /// This constructor can throw IO-related exceptions, see <see cref="File.ReadLines(string)"/> for details.
+        /// </remarks>
         ///
         public VisualStudioSolution(string path)
         {
@@ -90,7 +99,31 @@ namespace NuGit.VisualStudio
 
 
         /// <summary>
-        /// Load information from .sln file
+        /// Project references in the solution file
+        /// </summary>
+        ///
+        public IEnumerable<VisualStudioProjectReference> ProjectReferences
+        {
+            get { return _projectReferences; }
+        }
+
+        IList<VisualStudioProjectReference> _projectReferences;
+
+
+        /// <summary>
+        /// Nested project entries in the solution file
+        /// </summary>
+        ///
+        public IEnumerable<VisualStudioNestedProject> NestedProjects
+        {
+            get { return _nestedProjects; }
+        }
+
+        IList<VisualStudioNestedProject> _nestedProjects;
+
+
+        /// <summary>
+        /// Interpret information in the solution file
         /// </summary>
         ///
         void Load()
@@ -200,7 +233,7 @@ namespace NuGit.VisualStudio
 
 
         /// <summary>
-        /// Save information to .sln file
+        /// Save information to the <c>.sln</c> file
         /// </summary>
         ///
         public void Save()
@@ -220,30 +253,6 @@ namespace NuGit.VisualStudio
                 }
             }
         }
-
-
-        /// <summary>
-        /// Project references in the solution file
-        /// </summary>
-        ///
-        public IEnumerable<VisualStudioProjectReference> ProjectReferences
-        {
-            get { return _projectReferences; }
-        }
-
-        IList<VisualStudioProjectReference> _projectReferences;
-
-
-        /// <summary>
-        /// Nested project entries in the solution file
-        /// </summary>
-        ///
-        public IEnumerable<VisualStudioNestedProject> NestedProjects
-        {
-            get { return _nestedProjects; }
-        }
-
-        IList<VisualStudioNestedProject> _nestedProjects;
 
     }
 
