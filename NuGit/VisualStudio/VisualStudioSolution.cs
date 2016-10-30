@@ -20,6 +20,9 @@ namespace NuGit.VisualStudio
     ///
     public class VisualStudioSolution
     {
+        
+        const string SolutionFolderTypeId = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
+
 
         /// <summary>
         /// Find and load the solution in a directory
@@ -76,7 +79,7 @@ namespace NuGit.VisualStudio
 
 
         /// <summary>
-        /// The location of the solution file
+        /// The location of the <c>.sln</c> file
         /// </summary>
         ///
         public string Path
@@ -87,7 +90,7 @@ namespace NuGit.VisualStudio
 
 
         /// <summary>
-        /// Lines of text in the solution file
+        /// Lines of text
         /// </summary>
         ///
         public IEnumerable<string> Lines
@@ -99,7 +102,7 @@ namespace NuGit.VisualStudio
 
 
         /// <summary>
-        /// Project references in the solution file
+        /// Project references
         /// </summary>
         ///
         public IEnumerable<VisualStudioProjectReference> ProjectReferences
@@ -111,7 +114,7 @@ namespace NuGit.VisualStudio
 
 
         /// <summary>
-        /// Nested project entries in the solution file
+        /// Nested project entries
         /// </summary>
         ///
         public IEnumerable<VisualStudioNestedProject> NestedProjects
@@ -120,6 +123,20 @@ namespace NuGit.VisualStudio
         }
 
         IList<VisualStudioNestedProject> _nestedProjects;
+
+
+        /// <summary>
+        /// Solution folders
+        /// </summary>
+        ///
+        /// <remarks>
+        /// Solution folders are implemented as a special kind of project reference
+        /// </remarks>
+        ///
+        public IEnumerable<VisualStudioProjectReference> SolutionFolders
+        {
+            get { return ProjectReferences.Where(p => p.TypeId == SolutionFolderTypeId); }
+        }
 
 
         /// <summary>
