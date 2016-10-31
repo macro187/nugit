@@ -253,6 +253,13 @@ namespace NuGit
                     {
                         Trace.TraceInformation(nestedProject.ToString());
                     }
+
+                    Trace.TraceInformation("");
+                    Trace.TraceInformation("Build Configuration Mappings:");
+                    foreach (var mapping in sln.BuildConfigurationMappings)
+                    {
+                        Trace.TraceInformation(mapping.ToString());
+                    }
                 }
             }
 

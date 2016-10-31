@@ -126,6 +126,18 @@ namespace NuGit.VisualStudio
 
 
         /// <summary>
+        /// Build configuration mappings
+        /// </summary>
+        ///
+        public IEnumerable<VisualStudioBuildConfigurationMapping> BuildConfigurationMappings
+        {
+            get { return _buildConfigurationMappings; }
+        }
+
+        IList<VisualStudioBuildConfigurationMapping> _buildConfigurationMappings;
+
+
+        /// <summary>
         /// Solution folders
         /// </summary>
         ///
@@ -147,10 +159,12 @@ namespace NuGit.VisualStudio
         {
             _projectReferences = new List<VisualStudioProjectReference>();
             _nestedProjects = new List<VisualStudioNestedProject>();
+            _buildConfigurationMappings = new List<VisualStudioBuildConfigurationMapping>();
 
             int lineNumber = 0;
             int projectReferenceStart = 0;
             int nestedProjectsStart = 0;
+            int projectConfigurationsStart = 0;
             string id = "";
             string typeId = "";
             string name = "";
@@ -213,6 +227,35 @@ namespace NuGit.VisualStudio
                 }
 
                 //
+                // In project configurations block
+                //
+                if (projectConfigurationsStart != 0)
+                {
+                    if (line.Trim() == "EndGlobalSection")
+                    {
+                        projectConfigurationsStart = 0;
+                        continue;
+                    }
+
+                    match = Regex.Match(line, "^\\s*([^.]+)\\.([^.]+)\\.(.+) = (.+)$");
+                    if (!match.Success)
+                        throw new FileParseException(
+                            "Expected '{guid}.{configuration}.{property} = {configuration}'",
+                            lineNumber,
+                            line);
+
+                    _buildConfigurationMappings.Add(
+                        new VisualStudioBuildConfigurationMapping(
+                            match.Groups[1].Value,
+                            match.Groups[2].Value,
+                            match.Groups[3].Value,
+                            match.Groups[4].Value.Trim(),
+                            lineNumber));
+
+                    continue;
+                }
+
+                //
                 // Starting a project reference
                 //
                 match = Regex.Match(line, "Project\\(\"([^\"]*)\"\\) = \"([^\"]*)\", \"([^\"]*)\", \"([^\"]*)\"");
@@ -239,6 +282,15 @@ namespace NuGit.VisualStudio
                 if (line.Trim() == "GlobalSection(NestedProjects) = preSolution")
                 {
                     nestedProjectsStart = lineNumber;
+                    continue;
+                }
+
+                //
+                // Starting nested projects block
+                //
+                if (line.Trim() == "GlobalSection(ProjectConfigurationPlatforms) = postSolution")
+                {
+                    projectConfigurationsStart = lineNumber;
                     continue;
                 }
 
