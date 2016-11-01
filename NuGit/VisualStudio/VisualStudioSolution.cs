@@ -114,15 +114,17 @@ namespace NuGit.VisualStudio
 
 
         /// <summary>
-        /// Nested project entries
+        /// Solution folders
         /// </summary>
         ///
-        public IEnumerable<VisualStudioNestedProject> NestedProjects
+        /// <remarks>
+        /// Solution folders are implemented as a special kind of project reference
+        /// </remarks>
+        ///
+        public IEnumerable<VisualStudioProjectReference> SolutionFolders
         {
-            get { return _nestedProjects; }
+            get { return ProjectReferences.Where(p => p.TypeId == SolutionFolderTypeId); }
         }
-
-        IList<VisualStudioNestedProject> _nestedProjects;
 
 
         /// <summary>
@@ -138,17 +140,15 @@ namespace NuGit.VisualStudio
 
 
         /// <summary>
-        /// Solution folders
+        /// Nested project entries
         /// </summary>
         ///
-        /// <remarks>
-        /// Solution folders are implemented as a special kind of project reference
-        /// </remarks>
-        ///
-        public IEnumerable<VisualStudioProjectReference> SolutionFolders
+        public IEnumerable<VisualStudioNestedProject> NestedProjects
         {
-            get { return ProjectReferences.Where(p => p.TypeId == SolutionFolderTypeId); }
+            get { return _nestedProjects; }
         }
+
+        IList<VisualStudioNestedProject> _nestedProjects;
 
 
         /// <summary>
