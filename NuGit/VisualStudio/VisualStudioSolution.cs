@@ -107,6 +107,12 @@ namespace NuGit.VisualStudio
         }
 
 
+        public int GlobalEndLineNumber
+        {
+            get; private set;
+        }
+
+
         /// <summary>
         /// Project references
         /// </summary>
@@ -226,6 +232,7 @@ namespace NuGit.VisualStudio
         void Load()
         {
             GlobalStartLineNumber = 0;
+            GlobalEndLineNumber = 0;
             _projectReferences = new List<VisualStudioProjectReference>();
             _nestedProjects = new List<VisualStudioNestedProject>();
             _buildConfigurationMappings = new List<VisualStudioBuildConfigurationMapping>();
@@ -373,12 +380,23 @@ namespace NuGit.VisualStudio
                 }
 
                 //
+                // End of "Global" section
+                //
+                if (line.Trim() == "EndGlobal")
+                {
+                    GlobalEndLineNumber = lineNumber;
+                    continue;
+                }
+
+                //
                 // Nothing special
                 //
             }
 
             if (GlobalStartLineNumber == 0)
                 throw new FileParseException("No 'Global' section in file", 1, "");
+            if (GlobalEndLineNumber == 0)
+                throw new FileParseException("No 'EndGlobal' in file", 1, "");
         }
 
 
