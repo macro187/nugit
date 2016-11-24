@@ -101,6 +101,12 @@ namespace NuGit.VisualStudio
         IList<string> _lines;
 
 
+        public int GlobalStartLineNumber
+        {
+            get; private set;
+        }
+
+
         /// <summary>
         /// Project references
         /// </summary>
@@ -157,6 +163,7 @@ namespace NuGit.VisualStudio
         ///
         void Load()
         {
+            GlobalStartLineNumber = 0;
             _projectReferences = new List<VisualStudioProjectReference>();
             _nestedProjects = new List<VisualStudioNestedProject>();
             _buildConfigurationMappings = new List<VisualStudioBuildConfigurationMapping>();
@@ -295,9 +302,21 @@ namespace NuGit.VisualStudio
                 }
 
                 //
+                // Start of "Global" section
+                //
+                if (line.Trim() == "Global")
+                {
+                    GlobalStartLineNumber = lineNumber;
+                    continue;
+                }
+
+                //
                 // Nothing special
                 //
             }
+
+            if (GlobalStartLineNumber == 0)
+                throw new FileParseException("No 'Global' section in file", 1, "");
         }
 
 
