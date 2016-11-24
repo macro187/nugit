@@ -158,6 +158,68 @@ namespace NuGit.VisualStudio
 
 
         /// <summary>
+        /// Get a project reference with a specified id
+        /// </summary>
+        ///
+        /// <exception cref="ArgumentException">
+        /// No project with specified <paramref name="id"/> in solution
+        /// </exception>
+        ///
+        public VisualStudioProjectReference GetProjectReference(string id)
+        {
+            if (id == null) throw new ArgumentNullException("id");
+            var project = ProjectReferences.SingleOrDefault(p => p.Id == id);
+            if (project == null)
+                throw new ArgumentException(
+                    StringExtensions.FormatInvariant("No project with Id {0} in solution", id),
+                    "id");
+            return project;
+        }
+
+
+        /// <summary>
+        /// Add a project reference to the solution
+        /// </summary>
+        ///
+        public void AddProjectReference(string typeId, string name, string location, string id)
+        {
+            if (typeId == null) throw new ArgumentNullException("typeId");
+            if (name == null) throw new ArgumentNullException("name");
+            if (location == null) throw new ArgumentNullException("location");
+            if (id == null) throw new ArgumentNullException("id");
+            
+            _lines.Insert(GlobalStartLineNumber - 1, VisualStudioProjectReference.FormatEnd());
+            _lines.Insert(GlobalStartLineNumber - 1, VisualStudioProjectReference.FormatStart(typeId, name, location, id));
+            Load();
+        }
+
+
+        /// <summary>
+        /// Delete a project reference
+        /// </summary>
+        ///
+        public void DeleteProjectReference(string projectId)
+        {
+            if (projectId == null) throw new ArgumentNullException("projectId");
+            var project = GetProjectReference(projectId);
+            _lines.RemoveAt(project.LineNumber - 1, project.LineCount);
+            Load();
+        }
+
+
+        /// <summary>
+        /// Delete a project reference and anything else relating to it
+        /// </summary>
+        ///
+        public void DeleteProjectReferenceAndRelated(string projectId)
+        {
+            if (projectId == null) throw new ArgumentNullException("projectId");
+
+            DeleteProjectReference(projectId);
+        }
+
+
+        /// <summary>
         /// Interpret information in the solution file
         /// </summary>
         ///

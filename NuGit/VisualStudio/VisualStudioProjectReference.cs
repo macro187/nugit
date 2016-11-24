@@ -1,4 +1,5 @@
-﻿using NuGit.Infrastructure;
+﻿using System;
+using NuGit.Infrastructure;
 
 namespace NuGit.VisualStudio
 {
@@ -54,11 +55,32 @@ namespace NuGit.VisualStudio
         public int LineCount { get; private set; }
 
 
+        public static string FormatStart(string typeId, string name, string location, string id)
+        {
+            if (typeId == null) throw new ArgumentNullException("typeId");
+            if (name == null) throw new ArgumentNullException("name");
+            if (location == null) throw new ArgumentNullException("location");
+            if (id == null) throw new ArgumentNullException("id");
+
+            return StringExtensions.FormatInvariant(
+                "Project(\"{0}\") = \"{1}\", \"{2}\", \"{3}\"",
+                typeId, name, location, id);
+        }
+
+
+        public static string FormatEnd()
+        {
+            return "EndProject";
+        }
+
+
         public override string ToString()
         {
             return StringExtensions.FormatInvariant(
-                "Line {0}:{1}: Project(\"{2}\") = \"{3}\", \"{4}\", \"{5}\"",
-                LineNumber, LineCount, TypeId, Name, Location, Id);
+                "Line {0}:{1}: {2}",
+                LineNumber,
+                LineCount,
+                FormatStart(TypeId, Name, Location, Id));
         }
 
     }

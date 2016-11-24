@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Git\GitRepository.cs" />
+    <Compile Include="Infrastructure\CollectionExtensions.cs" />
     <Compile Include="Infrastructure\TraceExtensions.cs" />
     <Compile Include="Git\GitDependencyInfo.cs" />
     <Compile Include="VisualStudio\VisualStudioBuildConfigurationMapping.cs" />
