@@ -40,11 +40,20 @@ namespace NuGit.VisualStudio
         public int LineNumber { get; private set; }
 
 
+        public static string Format(string childProjectId, string parentProjectId)
+        {
+            if (parentProjectId == null) throw new ArgumentNullException("parentProjectId");
+            if (childProjectId == null) throw new ArgumentNullException("childProjectId");
+            return childProjectId + " = " + parentProjectId;
+        }
+
+
         public override string ToString()
         {
             return StringExtensions.FormatInvariant(
-                "Line {0}: {1} = {2}",
-                LineNumber, ChildProjectId, ParentProjectId);
+                "Line {0}: {1}",
+                LineNumber,
+                Format(ChildProjectId, ParentProjectId));
         }
 
     }

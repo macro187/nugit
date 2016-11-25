@@ -113,6 +113,18 @@ namespace NuGit.VisualStudio
         }
 
 
+        public int NestedProjectsStartLineNumber
+        {
+            get; private set;
+        }
+
+
+        public int NestedProjectsEndLineNumber
+        {
+            get; private set;
+        }
+
+
         /// <summary>
         /// Project references
         /// </summary>
@@ -194,8 +206,11 @@ namespace NuGit.VisualStudio
             if (location == null) throw new ArgumentNullException("location");
             if (id == null) throw new ArgumentNullException("id");
             
-            _lines.Insert(GlobalStartLineNumber - 1, VisualStudioProjectReference.FormatEnd());
-            _lines.Insert(GlobalStartLineNumber - 1, VisualStudioProjectReference.FormatStart(typeId, name, location, id));
+            _lines.Insert(
+                GlobalStartLineNumber - 1,
+                VisualStudioProjectReference.FormatStart(typeId, name, location, id),
+                VisualStudioProjectReference.FormatEnd());
+
             Load();
         }
 
@@ -221,7 +236,68 @@ namespace NuGit.VisualStudio
         {
             if (projectId == null) throw new ArgumentNullException("projectId");
 
+            VisualStudioNestedProject nesting;
+            while ((nesting = NestedProjects.FirstOrDefault(n =>
+                n.ParentProjectId == projectId || n.ChildProjectId == projectId)) != null)
+            {
+                DeleteNestedProject(nesting);
+            }
+
             DeleteProjectReference(projectId);
+        }
+
+
+        /// <summary>
+        /// Add a nested projects section
+        /// </summary>
+        ///
+        /// <exception cref="InvalidOperationException">
+        /// The solution already contains a nested projects section
+        /// </exception>
+        ///
+        public void AddNestedProjectsSection()
+        {
+            if (NestedProjectsStartLineNumber != 0)
+                throw new InvalidOperationException("Solution already contains a nested projects section");
+
+            _lines.Insert(
+                GlobalEndLineNumber,
+                "\tGlobalSection(NestedProjects) = preSolution",
+                "\tEndGlobalSection");
+
+            Load();
+        }
+
+
+        /// <summary>
+        /// Add a nested project entry
+        /// </summary>
+        ///
+        public void AddNestedProject(string childProjectId, string parentProjectId)
+        {
+            if (parentProjectId == null) throw new ArgumentNullException("parentProjectId");
+            if (childProjectId == null) throw new ArgumentNullException("childProjectId");
+
+            if (NestedProjectsStartLineNumber == 0)
+                AddNestedProjectsSection();
+
+            _lines.Insert(
+                NestedProjectsEndLineNumber,
+                "\t\t" + VisualStudioNestedProject.Format(childProjectId, parentProjectId));
+
+            Load();
+        }
+
+
+        /// <summary>
+        /// Delete a nested project entry
+        /// </summary>
+        ///
+        public void DeleteNestedProject(VisualStudioNestedProject nestedProject)
+        {
+            if (nestedProject == null) throw new ArgumentNullException("nestedProject");
+            _lines.RemoveAt(nestedProject.LineNumber - 1);
+            Load();
         }
 
 
@@ -233,13 +309,14 @@ namespace NuGit.VisualStudio
         {
             GlobalStartLineNumber = 0;
             GlobalEndLineNumber = 0;
+            NestedProjectsStartLineNumber = 0;
+            NestedProjectsEndLineNumber = 0;
             _projectReferences = new List<VisualStudioProjectReference>();
             _nestedProjects = new List<VisualStudioNestedProject>();
             _buildConfigurationMappings = new List<VisualStudioBuildConfigurationMapping>();
 
             int lineNumber = 0;
             int projectReferenceStart = 0;
-            int nestedProjectsStart = 0;
             int projectConfigurationsStart = 0;
             string id = "";
             string typeId = "";
@@ -278,11 +355,11 @@ namespace NuGit.VisualStudio
                 //
                 // In nested projects block
                 //
-                if (nestedProjectsStart != 0)
+                if (NestedProjectsStartLineNumber != 0 && NestedProjectsEndLineNumber == 0)
                 {
                     if (line.Trim() == "EndGlobalSection")
                     {
-                        nestedProjectsStart = 0;
+                        NestedProjectsEndLineNumber = lineNumber;
                         continue;
                     }
 
@@ -357,12 +434,12 @@ namespace NuGit.VisualStudio
                 //
                 if (line.Trim() == "GlobalSection(NestedProjects) = preSolution")
                 {
-                    nestedProjectsStart = lineNumber;
+                    NestedProjectsStartLineNumber = lineNumber;
                     continue;
                 }
 
                 //
-                // Starting nested projects block
+                // Starting project configurations block
                 //
                 if (line.Trim() == "GlobalSection(ProjectConfigurationPlatforms) = postSolution")
                 {
@@ -397,6 +474,8 @@ namespace NuGit.VisualStudio
                 throw new FileParseException("No 'Global' section in file", 1, "");
             if (GlobalEndLineNumber == 0)
                 throw new FileParseException("No 'EndGlobal' in file", 1, "");
+            if (NestedProjectsStartLineNumber != 0 && NestedProjectsEndLineNumber == 0)
+                throw new FileParseException("No nested projects 'EndGlobalSection' in file", 1, "");
         }
 
 
