@@ -132,6 +132,18 @@ namespace NuGit.VisualStudio
         }
 
 
+        public int ProjectConfigurationsStartLineNumber
+        {
+            get; private set;
+        }
+
+
+        public int ProjectConfigurationsEndLineNumber
+        {
+            get; private set;
+        }
+
+
         /// <summary>
         /// Project references
         /// </summary>
@@ -183,15 +195,15 @@ namespace NuGit.VisualStudio
 
 
         /// <summary>
-        /// Build configuration mappings
+        /// Project configurations
         /// </summary>
         ///
-        public IEnumerable<VisualStudioBuildConfigurationMapping> BuildConfigurationMappings
+        public IEnumerable<VisualStudioProjectConfiguration> ProjectConfigurations
         {
-            get { return _buildConfigurationMappings; }
+            get { return _projectConfigurations; }
         }
 
-        IList<VisualStudioBuildConfigurationMapping> _buildConfigurationMappings;
+        IList<VisualStudioProjectConfiguration> _projectConfigurations;
 
 
         /// <summary>
@@ -270,6 +282,17 @@ namespace NuGit.VisualStudio
                 if (nesting == null) break;
                     
                 DeleteNestedProject(nesting);
+            }
+
+            //
+            // Delete related project configurations
+            //
+            for (;;)
+            {
+                var configuration = ProjectConfigurations.FirstOrDefault(c => c.ProjectId == projectId);
+                if (configuration == null) break;
+
+                DeleteProjectConfiguration(configuration);
             }
 
             //
@@ -405,6 +428,91 @@ namespace NuGit.VisualStudio
 
 
         /// <summary>
+        /// Add a project configurations section
+        /// </summary>
+        ///
+        /// <exception cref="InvalidOperationException">
+        /// The solution already contains a project configurations section
+        /// </exception>
+        ///
+        public void AddProjectConfigurationsSection()
+        {
+            if (ProjectConfigurationsStartLineNumber >= 0)
+                throw new InvalidOperationException("Solution already contains a project configurations section");
+
+            int lineNumber = GlobalEndLineNumber;
+            if (SolutionConfigurationsEndLineNumber >= 0)
+            {
+                lineNumber = SolutionConfigurationsEndLineNumber + 1;
+            }
+
+            _lines.Insert(
+                lineNumber,
+                "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution",
+                "\tEndGlobalSection");
+
+            Load();
+        }
+
+
+        /// <summary>
+        /// Add a project configuration entry
+        /// </summary>
+        ///
+        public void AddProjectConfiguration(
+            string projectId,
+            string projectConfiguration,
+            string property,
+            string solutionConfiguration)
+        {
+            if (ProjectConfigurationsStartLineNumber < 0)
+                AddProjectConfigurationsSection();
+
+            int lineNumber = ProjectConfigurationsEndLineNumber;
+
+            var next =
+                ProjectConfigurations
+                    .FirstOrDefault(c =>
+                        c.ProjectId == projectId &&
+                        string.CompareOrdinal(c.SolutionConfiguration, solutionConfiguration) > 0);
+            if (next != null)
+                lineNumber = next.LineNumber;
+
+            var prev =
+                ProjectConfigurations
+                    .LastOrDefault(c => c.ProjectId == projectId && c.SolutionConfiguration == solutionConfiguration)
+                ?? ProjectConfigurations
+                    .LastOrDefault(c => c.ProjectId == projectId);
+            if (prev != null)
+                lineNumber = prev.LineNumber + 1;
+
+            _lines.Insert(
+                lineNumber,
+                "\t\t" + VisualStudioProjectConfiguration.Format(
+                    projectId,
+                    projectConfiguration,
+                    property,
+                    solutionConfiguration));
+
+            Load();
+        }
+
+
+        /// <summary>
+        /// Delete a project configuration entry
+        /// </summary>
+        ///
+        public void DeleteProjectConfiguration(VisualStudioProjectConfiguration configuration)
+        {
+            if (configuration == null) throw new ArgumentNullException("configuration");
+
+            _lines.RemoveAt(configuration.LineNumber);
+
+            Load();
+        }
+
+
+        /// <summary>
         /// Interpret information in the solution file
         /// </summary>
         ///
@@ -420,14 +528,15 @@ namespace NuGit.VisualStudio
             NestedProjectsEndLineNumber = -1;
             SolutionConfigurationsStartLineNumber = -1;
             SolutionConfigurationsEndLineNumber = -1;
+            ProjectConfigurationsStartLineNumber = -1;
+            ProjectConfigurationsEndLineNumber = -1;
             _projectReferences = new List<VisualStudioProjectReference>();
             _nestedProjects = new List<VisualStudioNestedProject>();
             _solutionConfigurations = new HashSet<string>();
-            _buildConfigurationMappings = new List<VisualStudioBuildConfigurationMapping>();
+            _projectConfigurations = new List<VisualStudioProjectConfiguration>();
 
             int lineNumber = -1;
             int projectReferenceStartLineNumber = -1;
-            int projectConfigurationsStartLineNumber = -1;
             string id = "";
             string typeId = "";
             string name = "";
@@ -500,14 +609,14 @@ namespace NuGit.VisualStudio
                         continue;
                     }
 
-                    match = Regex.Match(line, "^([^=]+) = (.+)$");
+                    match = Regex.Match(line, "^\\s*([^=]+) = (.+)$");
                     if (!match.Success)
                         throw new FileParseException(
                             "Expected '{configuration} = {configuration}'",
                             lineNumber + 1,
                             line);
 
-                    _solutionConfigurations.Add(match.Groups[1].Value);
+                    _solutionConfigurations.Add(match.Groups[1].Value.Trim());
 
                     continue;
                 }
@@ -515,11 +624,11 @@ namespace NuGit.VisualStudio
                 //
                 // In project configurations block
                 //
-                if (projectConfigurationsStartLineNumber >= 0)
+                if (ProjectConfigurationsStartLineNumber >= 0 && ProjectConfigurationsEndLineNumber < 0)
                 {
                     if (line.Trim() == "EndGlobalSection")
                     {
-                        projectConfigurationsStartLineNumber = -1;
+                        ProjectConfigurationsEndLineNumber = lineNumber;
                         continue;
                     }
 
@@ -530,8 +639,8 @@ namespace NuGit.VisualStudio
                             lineNumber + 1,
                             line);
 
-                    _buildConfigurationMappings.Add(
-                        new VisualStudioBuildConfigurationMapping(
+                    _projectConfigurations.Add(
+                        new VisualStudioProjectConfiguration(
                             match.Groups[1].Value,
                             match.Groups[2].Value,
                             match.Groups[3].Value,
@@ -587,7 +696,7 @@ namespace NuGit.VisualStudio
                 //
                 if (line.Trim() == "GlobalSection(ProjectConfigurationPlatforms) = postSolution")
                 {
-                    projectConfigurationsStartLineNumber = lineNumber;
+                    ProjectConfigurationsStartLineNumber = lineNumber;
                     continue;
                 }
 

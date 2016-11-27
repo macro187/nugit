@@ -63,7 +63,7 @@
     <Compile Include="Infrastructure\CollectionExtensions.cs" />
     <Compile Include="Infrastructure\TraceExtensions.cs" />
     <Compile Include="Git\GitDependencyInfo.cs" />
-    <Compile Include="VisualStudio\VisualStudioBuildConfigurationMapping.cs" />
+    <Compile Include="VisualStudio\VisualStudioProjectConfiguration.cs" />
     <Compile Include="VisualStudio\VisualStudioNestedProject.cs" />
     <Compile Include="VisualStudio\VisualStudioProjectReference.cs" />
     <Compile Include="VisualStudio\VisualStudioSolution.cs" />
