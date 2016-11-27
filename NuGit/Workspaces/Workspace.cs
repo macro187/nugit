@@ -72,6 +72,35 @@ namespace NuGit.Workspaces
 
 
         /// <summary>
+        /// Get a repository in the workspace
+        /// </summary>
+        ///
+        /// <param name="name">
+        /// Name of the repository
+        /// </param>
+        ///
+        /// <returns>
+        /// The repository named <paramref name="name"/>
+        /// </returns>
+        ///
+        /// <exception cref="ArgumentException">
+        /// No repository named <paramref name="name"/> exists in the workspace
+        /// </exception>
+        ///
+        public Repository GetRepository(GitRepositoryName name)
+        {
+            var repository = FindRepository(name);
+            if (repository == null)
+                throw new ArgumentException(
+                    StringExtensions.FormatInvariant(
+                        "No repository named '{0}' in workspace",
+                        name),
+                    "name");
+            return repository;
+        }
+
+
+        /// <summary>
         /// Look for a repository in the workspace
         /// </summary>
         ///

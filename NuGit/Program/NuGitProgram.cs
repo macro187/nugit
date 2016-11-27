@@ -225,43 +225,7 @@ namespace NuGit
             var repository = WhereAmI();
             if (repository == null) throw new UserErrorException("Not in a repository");
 
-            var workspace = repository.Workspace;
-
-            var dependencies = DependencyTraverser.GetAllDependencies(repository);
-
-            foreach (var name in dependencies)
-            {
-                using (TraceExtensions.Step(name))
-                {
-                    var repo = workspace.FindRepository(name);
-                    var sln = VisualStudioSolution.Find(repo.RootPath);
-                    if (sln == null)
-                    {
-                        Trace.TraceInformation("No .sln");
-                        continue;
-                    }
-
-                    Trace.TraceInformation("Project References:");
-                    foreach (var projectReference in sln.ProjectReferences)
-                    {
-                        Trace.TraceInformation(projectReference.ToString());
-                    }
-
-                    Trace.TraceInformation("");
-                    Trace.TraceInformation("Nested Projects:");
-                    foreach (var nestedProject in sln.NestedProjects)
-                    {
-                        Trace.TraceInformation(nestedProject.ToString());
-                    }
-
-                    Trace.TraceInformation("");
-                    Trace.TraceInformation("Build Configuration Mappings:");
-                    foreach (var mapping in sln.BuildConfigurationMappings)
-                    {
-                        Trace.TraceInformation(mapping.ToString());
-                    }
-                }
-            }
+            Installer.Install(repository);
 
             return 0;
         }
