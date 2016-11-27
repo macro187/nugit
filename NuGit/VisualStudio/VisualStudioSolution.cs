@@ -452,7 +452,7 @@ namespace NuGit.VisualStudio
                     {
                         _projectReferences.Add(
                             new VisualStudioProjectReference(
-                                id, typeId, name, location, projectReferenceStartLineNumber, lineNumber - projectReferenceStartLineNumber));
+                                id, typeId, name, location, projectReferenceStartLineNumber, lineNumber - projectReferenceStartLineNumber + 1));
                         projectReferenceStartLineNumber = -1;
                         id = "";
                         typeId = "";
