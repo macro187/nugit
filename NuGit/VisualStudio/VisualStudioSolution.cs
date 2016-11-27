@@ -21,9 +21,6 @@ namespace NuGit.VisualStudio
     public class VisualStudioSolution
     {
         
-        const string SolutionFolderTypeId = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
-
-
         /// <summary>
         /// Find and load the solution in a directory
         /// </summary>
@@ -40,24 +37,21 @@ namespace NuGit.VisualStudio
         ///
         public static VisualStudioSolution Find(string directoryPath)
         {
-            if (directoryPath == null) throw new ArgumentNullException("directoryPath");
+            if (directoryPath == null)
+                throw new ArgumentNullException("directoryPath");
             if (!Directory.Exists(directoryPath))
-            {
                 throw new ArgumentException("Directory doesn't exist", "directoryPath");
-            }
 
             var slnPaths = Directory.GetFiles(directoryPath, "*.sln");
-            if (slnPaths.Length == 0) return null;
+            if (slnPaths.Length == 0)
+                return null;
             if (slnPaths.Length > 1)
-            {
                 throw new UserErrorException(
                     StringExtensions.FormatInvariant(
                         "More than one .sln found in {0}",
                         directoryPath));
-            }
-            var slnPath = slnPaths[0];
 
-            return new VisualStudioSolution(slnPath);
+            return new VisualStudioSolution(slnPaths[0]);
         }
 
 
@@ -72,6 +66,7 @@ namespace NuGit.VisualStudio
         public VisualStudioSolution(string path)
         {
             if (path == null) throw new ArgumentNullException("path");
+
             Path = path;
             _lines = File.ReadLines(path).ToList();
             Load();
@@ -147,7 +142,7 @@ namespace NuGit.VisualStudio
         ///
         public IEnumerable<VisualStudioProjectReference> SolutionFolders
         {
-            get { return ProjectReferences.Where(p => p.TypeId == SolutionFolderTypeId); }
+            get { return ProjectReferences.Where(p => p.TypeId == VisualStudioProjectReference.SolutionFolderTypeId); }
         }
 
 
@@ -186,11 +181,13 @@ namespace NuGit.VisualStudio
         public VisualStudioProjectReference GetProjectReference(string id)
         {
             if (id == null) throw new ArgumentNullException("id");
+
             var project = ProjectReferences.SingleOrDefault(p => p.Id == id);
             if (project == null)
                 throw new ArgumentException(
                     StringExtensions.FormatInvariant("No project with Id {0} in solution", id),
                     "id");
+
             return project;
         }
 
@@ -207,7 +204,7 @@ namespace NuGit.VisualStudio
             if (id == null) throw new ArgumentNullException("id");
             
             _lines.Insert(
-                GlobalStartLineNumber - 1,
+                GlobalStartLineNumber,
                 VisualStudioProjectReference.FormatStart(typeId, name, location, id),
                 VisualStudioProjectReference.FormatEnd());
 
@@ -219,11 +216,12 @@ namespace NuGit.VisualStudio
         /// Delete a project reference
         /// </summary>
         ///
-        public void DeleteProjectReference(string projectId)
+        public void DeleteProjectReference(VisualStudioProjectReference projectReference)
         {
-            if (projectId == null) throw new ArgumentNullException("projectId");
-            var project = GetProjectReference(projectId);
-            _lines.RemoveAt(project.LineNumber - 1, project.LineCount);
+            if (projectReference == null) throw new ArgumentNullException("projectReference");
+
+            _lines.RemoveAt(projectReference.LineNumber, projectReference.LineCount);
+
             Load();
         }
 
@@ -232,18 +230,28 @@ namespace NuGit.VisualStudio
         /// Delete a project reference and anything else relating to it
         /// </summary>
         ///
-        public void DeleteProjectReferenceAndRelated(string projectId)
+        public void DeleteProjectReferenceAndRelated(VisualStudioProjectReference projectReference)
         {
-            if (projectId == null) throw new ArgumentNullException("projectId");
+            if (projectReference == null) throw new ArgumentNullException("projectReference");
 
-            VisualStudioNestedProject nesting;
-            while ((nesting = NestedProjects.FirstOrDefault(n =>
-                n.ParentProjectId == projectId || n.ChildProjectId == projectId)) != null)
+            var projectId = projectReference.Id;
+
+            //
+            // Delete related NestedProjects entries
+            //
+            for (;;)
             {
+                var nesting =
+                    NestedProjects.FirstOrDefault(n => n.ParentProjectId == projectId || n.ChildProjectId == projectId);
+                if (nesting == null) break;
+                    
                 DeleteNestedProject(nesting);
             }
 
-            DeleteProjectReference(projectId);
+            //
+            // Delete the project reference itself
+            //
+            DeleteProjectReference(GetProjectReference(projectId));
         }
 
 
@@ -257,7 +265,7 @@ namespace NuGit.VisualStudio
         ///
         public void AddNestedProjectsSection()
         {
-            if (NestedProjectsStartLineNumber != 0)
+            if (NestedProjectsStartLineNumber >= 0)
                 throw new InvalidOperationException("Solution already contains a nested projects section");
 
             _lines.Insert(
@@ -278,7 +286,7 @@ namespace NuGit.VisualStudio
             if (parentProjectId == null) throw new ArgumentNullException("parentProjectId");
             if (childProjectId == null) throw new ArgumentNullException("childProjectId");
 
-            if (NestedProjectsStartLineNumber == 0)
+            if (NestedProjectsStartLineNumber < 0)
                 AddNestedProjectsSection();
 
             _lines.Insert(
@@ -296,8 +304,79 @@ namespace NuGit.VisualStudio
         public void DeleteNestedProject(VisualStudioNestedProject nestedProject)
         {
             if (nestedProject == null) throw new ArgumentNullException("nestedProject");
-            _lines.RemoveAt(nestedProject.LineNumber - 1);
+
+            _lines.RemoveAt(nestedProject.LineNumber);
+
             Load();
+        }
+
+
+        /// <summary>
+        /// Add a solution folder to the solution
+        /// </summary>
+        ///
+        /// <returns>
+        /// The project reference Id of the newly-added solution folder
+        /// </returns>
+        ///
+        public string AddSolutionFolder(string name)
+        {
+            var id = Guid.NewGuid().ToString("B").ToUpperInvariant();
+
+            AddProjectReference(
+                VisualStudioProjectReference.SolutionFolderTypeId,
+                name,
+                name,
+                id);
+
+            return id;
+        }
+
+
+        /// <summary>
+        /// Completely delete a solution folder and all its contents
+        /// </summary>
+        ///
+        /// <remarks>
+        /// To delete just the solution folder project reference, use <see cref="DeleteProjectReference(string)"/>
+        /// </remarks>
+        ///
+        public void DeleteSolutionFolder(VisualStudioProjectReference solutionFolder)
+        {
+            if (solutionFolder == null)
+                throw new ArgumentNullException("solutionFolder");
+
+            if (solutionFolder.TypeId != VisualStudioProjectReference.SolutionFolderTypeId)
+                throw new ArgumentException("Not a solution folder", "solutionFolder");
+
+            var solutionFolderId = solutionFolder.Id;
+
+            //
+            // Delete child folders and projects
+            //
+            for(;;)
+            {
+                var childProject =
+                    NestedProjects
+                        .Where(np => np.ParentProjectId == solutionFolderId)
+                        .Select(np => GetProjectReference(np.ChildProjectId))
+                        .FirstOrDefault();
+                if (childProject == null) break;
+                
+                if (childProject.TypeId == VisualStudioProjectReference.SolutionFolderTypeId)
+                {
+                    DeleteSolutionFolder(childProject);
+                }
+                else
+                {
+                    DeleteProjectReferenceAndRelated(childProject);
+                }
+            }
+
+            //
+            // Delete the folder itself
+            //
+            DeleteProjectReferenceAndRelated(GetProjectReference(solutionFolderId));
         }
 
 
@@ -307,17 +386,17 @@ namespace NuGit.VisualStudio
         ///
         void Load()
         {
-            GlobalStartLineNumber = 0;
-            GlobalEndLineNumber = 0;
-            NestedProjectsStartLineNumber = 0;
-            NestedProjectsEndLineNumber = 0;
+            GlobalStartLineNumber = -1;
+            GlobalEndLineNumber = -1;
+            NestedProjectsStartLineNumber = -1;
+            NestedProjectsEndLineNumber = -1;
             _projectReferences = new List<VisualStudioProjectReference>();
             _nestedProjects = new List<VisualStudioNestedProject>();
             _buildConfigurationMappings = new List<VisualStudioBuildConfigurationMapping>();
 
-            int lineNumber = 0;
-            int projectReferenceStart = 0;
-            int projectConfigurationsStart = 0;
+            int lineNumber = -1;
+            int projectReferenceStartLineNumber = -1;
+            int projectConfigurationsStartLineNumber = -1;
             string id = "";
             string typeId = "";
             string name = "";
@@ -336,14 +415,14 @@ namespace NuGit.VisualStudio
                 //
                 // In a project reference block
                 //
-                if (projectReferenceStart != 0)
+                if (projectReferenceStartLineNumber >= 0)
                 {
                     if (line.Trim() == "EndProject")
                     {
                         _projectReferences.Add(
                             new VisualStudioProjectReference(
-                                id, typeId, name, location, projectReferenceStart, lineNumber - projectReferenceStart + 1));
-                        projectReferenceStart = 0;
+                                id, typeId, name, location, projectReferenceStartLineNumber, lineNumber - projectReferenceStartLineNumber));
+                        projectReferenceStartLineNumber = -1;
                         id = "";
                         typeId = "";
                         name = "";
@@ -355,7 +434,7 @@ namespace NuGit.VisualStudio
                 //
                 // In nested projects block
                 //
-                if (NestedProjectsStartLineNumber != 0 && NestedProjectsEndLineNumber == 0)
+                if (NestedProjectsStartLineNumber >= 0 && NestedProjectsEndLineNumber < 0)
                 {
                     if (line.Trim() == "EndGlobalSection")
                     {
@@ -367,7 +446,7 @@ namespace NuGit.VisualStudio
                     if (!match.Success)
                         throw new FileParseException(
                             "Expected '{guid} = {guid}'",
-                            lineNumber,
+                            lineNumber + 1,
                             line);
 
                     _nestedProjects.Add(
@@ -382,11 +461,11 @@ namespace NuGit.VisualStudio
                 //
                 // In project configurations block
                 //
-                if (projectConfigurationsStart != 0)
+                if (projectConfigurationsStartLineNumber >= 0)
                 {
                     if (line.Trim() == "EndGlobalSection")
                     {
-                        projectConfigurationsStart = 0;
+                        projectConfigurationsStartLineNumber = -1;
                         continue;
                     }
 
@@ -394,7 +473,7 @@ namespace NuGit.VisualStudio
                     if (!match.Success)
                         throw new FileParseException(
                             "Expected '{guid}.{configuration}.{property} = {configuration}'",
-                            lineNumber,
+                            lineNumber + 1,
                             line);
 
                     _buildConfigurationMappings.Add(
@@ -414,13 +493,13 @@ namespace NuGit.VisualStudio
                 match = Regex.Match(line, "Project\\(\"([^\"]*)\"\\) = \"([^\"]*)\", \"([^\"]*)\", \"([^\"]*)\"");
                 if (match.Success)
                 {
-                    if (projectReferenceStart != 0)
+                    if (projectReferenceStartLineNumber >= 0)
                         throw new FileParseException(
                             "Expected 'EndProject'",
-                            lineNumber,
+                            lineNumber + 1,
                             line);
 
-                    projectReferenceStart = lineNumber;
+                    projectReferenceStartLineNumber = lineNumber;
                     typeId = match.Groups[1].Value;
                     name = match.Groups[2].Value;
                     location = match.Groups[3].Value;
@@ -443,7 +522,7 @@ namespace NuGit.VisualStudio
                 //
                 if (line.Trim() == "GlobalSection(ProjectConfigurationPlatforms) = postSolution")
                 {
-                    projectConfigurationsStart = lineNumber;
+                    projectConfigurationsStartLineNumber = lineNumber;
                     continue;
                 }
 
@@ -470,11 +549,11 @@ namespace NuGit.VisualStudio
                 //
             }
 
-            if (GlobalStartLineNumber == 0)
+            if (GlobalStartLineNumber < 0)
                 throw new FileParseException("No 'Global' section in file", 1, "");
-            if (GlobalEndLineNumber == 0)
+            if (GlobalEndLineNumber < 0)
                 throw new FileParseException("No 'EndGlobal' in file", 1, "");
-            if (NestedProjectsStartLineNumber != 0 && NestedProjectsEndLineNumber == 0)
+            if (NestedProjectsStartLineNumber >= 0 && NestedProjectsEndLineNumber < 0)
                 throw new FileParseException("No nested projects 'EndGlobalSection' in file", 1, "");
         }
 

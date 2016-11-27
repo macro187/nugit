@@ -52,7 +52,7 @@ namespace NuGit.VisualStudio
         {
             return StringExtensions.FormatInvariant(
                 "Line {0}: {1}",
-                LineNumber,
+                LineNumber + 1,
                 Format(ChildProjectId, ParentProjectId));
         }
 

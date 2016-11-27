@@ -59,7 +59,7 @@ namespace NuGit.VisualStudio
         {
             return StringExtensions.FormatInvariant(
                 "Line {0}: {1}.{2}.{3} = {4}",
-                LineNumber,
+                LineNumber + 1,
                 ProjectId,
                 SolutionBuildConfiguration,
                 Property,

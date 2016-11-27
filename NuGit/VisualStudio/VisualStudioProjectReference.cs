@@ -20,6 +20,9 @@ namespace NuGit.VisualStudio
     public class VisualStudioProjectReference
     {
 
+        public static readonly string SolutionFolderTypeId = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
+
+
         public VisualStudioProjectReference(
             string id,
             string typeId,
@@ -78,7 +81,7 @@ namespace NuGit.VisualStudio
         {
             return StringExtensions.FormatInvariant(
                 "Line {0}:{1}: {2}",
-                LineNumber,
+                LineNumber + 1,
                 LineCount,
                 FormatStart(TypeId, Name, Location, Id));
         }

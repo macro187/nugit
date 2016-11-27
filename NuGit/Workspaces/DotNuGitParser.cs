@@ -46,7 +46,7 @@ namespace NuGit.Workspaces
                 {
                     throw new FileParseException(
                         "Invalid Git repository URL: " + fe.Message,
-                        lineNumber,
+                        lineNumber + 1,
                         line,
                         fe);
                 }
