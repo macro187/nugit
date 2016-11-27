@@ -79,17 +79,40 @@ namespace NuGit.Workspaces
                     return;
                 }
 
+                // TODO Consider configurations in each individual dependency project, not just the solution
+                var configurationsInCommon =
+                    sln.SolutionConfigurations.Intersect(dependencySln.SolutionConfigurations)
+                        .OrderBy(s => s)
+                        .ToList();
+
                 var dependencyFolderId = sln.AddSolutionFolder(NugitFolderPrefix + dependencyName);
 
                 foreach (var p in dependencyProjects)
                 {
                     Trace.TraceInformation("Installing " + Path.GetFileName(p.Location));
+
+                    //
+                    // Add reference to the dependency project
+                    //
                     sln.AddProjectReference(
                         p.TypeId,
                         p.Name,
                         Path.Combine("..", dependencyName, p.Location),
                         p.Id);
+
+                    //
+                    // Put it in the dependency's solution folder
+                    //
                     sln.AddNestedProject(p.Id, dependencyFolderId);
+
+                    //
+                    // Add solution -> project configuration mappings
+                    //
+                    foreach (string configuration in configurationsInCommon)
+                    {
+                        sln.AddProjectConfiguration(p.Id, configuration, "ActiveCfg", configuration);
+                        sln.AddProjectConfiguration(p.Id, configuration, "Build.0", configuration);
+                    }
                 }
             }
         }
