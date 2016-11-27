@@ -120,6 +120,18 @@ namespace NuGit.VisualStudio
         }
 
 
+        public int SolutionConfigurationsStartLineNumber
+        {
+            get; private set;
+        }
+
+
+        public int SolutionConfigurationsEndLineNumber
+        {
+            get; private set;
+        }
+
+
         /// <summary>
         /// Project references
         /// </summary>
@@ -147,18 +159,6 @@ namespace NuGit.VisualStudio
 
 
         /// <summary>
-        /// Build configuration mappings
-        /// </summary>
-        ///
-        public IEnumerable<VisualStudioBuildConfigurationMapping> BuildConfigurationMappings
-        {
-            get { return _buildConfigurationMappings; }
-        }
-
-        IList<VisualStudioBuildConfigurationMapping> _buildConfigurationMappings;
-
-
-        /// <summary>
         /// Nested project entries
         /// </summary>
         ///
@@ -168,6 +168,30 @@ namespace NuGit.VisualStudio
         }
 
         IList<VisualStudioNestedProject> _nestedProjects;
+
+
+        /// <summary>
+        /// Solution configurations
+        /// </summary>
+        ///
+        public ISet<string> SolutionConfigurations
+        {
+            get { return _solutionConfigurations; }
+        }
+
+        ISet<string> _solutionConfigurations;
+
+
+        /// <summary>
+        /// Build configuration mappings
+        /// </summary>
+        ///
+        public IEnumerable<VisualStudioBuildConfigurationMapping> BuildConfigurationMappings
+        {
+            get { return _buildConfigurationMappings; }
+        }
+
+        IList<VisualStudioBuildConfigurationMapping> _buildConfigurationMappings;
 
 
         /// <summary>
@@ -384,14 +408,21 @@ namespace NuGit.VisualStudio
         /// Interpret information in the solution file
         /// </summary>
         ///
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Maintainability",
+            "CA1502:AvoidExcessiveComplexity",
+            Justification = "It's a big state machine, not sure how to decompose in a simple clear way")]
         void Load()
         {
             GlobalStartLineNumber = -1;
             GlobalEndLineNumber = -1;
             NestedProjectsStartLineNumber = -1;
             NestedProjectsEndLineNumber = -1;
+            SolutionConfigurationsStartLineNumber = -1;
+            SolutionConfigurationsEndLineNumber = -1;
             _projectReferences = new List<VisualStudioProjectReference>();
             _nestedProjects = new List<VisualStudioNestedProject>();
+            _solutionConfigurations = new HashSet<string>();
             _buildConfigurationMappings = new List<VisualStudioBuildConfigurationMapping>();
 
             int lineNumber = -1;
@@ -459,6 +490,29 @@ namespace NuGit.VisualStudio
                 }
 
                 //
+                // In solution configurations block
+                //
+                if (SolutionConfigurationsStartLineNumber >= 0 && SolutionConfigurationsEndLineNumber < 0)
+                {
+                    if (line.Trim() == "EndGlobalSection")
+                    {
+                        SolutionConfigurationsEndLineNumber = lineNumber;
+                        continue;
+                    }
+
+                    match = Regex.Match(line, "^([^=]+) = (.+)$");
+                    if (!match.Success)
+                        throw new FileParseException(
+                            "Expected '{configuration} = {configuration}'",
+                            lineNumber + 1,
+                            line);
+
+                    _solutionConfigurations.Add(match.Groups[1].Value);
+
+                    continue;
+                }
+
+                //
                 // In project configurations block
                 //
                 if (projectConfigurationsStartLineNumber >= 0)
@@ -516,6 +570,17 @@ namespace NuGit.VisualStudio
                     NestedProjectsStartLineNumber = lineNumber;
                     continue;
                 }
+
+
+                //
+                // Starting solution configurations block
+                //
+                if (line.Trim() == "GlobalSection(SolutionConfigurationPlatforms) = preSolution")
+                {
+                    SolutionConfigurationsStartLineNumber = lineNumber;
+                    continue;
+                }
+
 
                 //
                 // Starting project configurations block
