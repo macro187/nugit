@@ -9,13 +9,13 @@ namespace NuGit.Infrastructure
     ///
     /// <remarks>
     /// <para>
-    /// <see cref="Trace.WriteLine(string)"/> is output to stdout as-is.
+    /// <see cref="Trace.WriteLine(string)"/> is output to stderr as-is.
     /// </para>
     /// <para>
-    /// <see cref="Trace.TraceInformation(string)"/> is output to stdout as-is, if not <see cref="Quiet"/>.
+    /// <see cref="Trace.TraceInformation(string)"/> is output to stderr as-is, if not <see cref="Quiet"/>.
     /// </para>
     /// <para>
-    /// <see cref="Trace.TraceWarning(string)"/> and <see cref="Trace.TraceError(string)"/> are output to stdout in the
+    /// <see cref="Trace.TraceWarning(string)"/> and <see cref="Trace.TraceError(string)"/> are output to stderr in the
     /// format <c>[&lt;severity&gt;] &lt;message&gt;</c>.
     /// </para>
     /// </remarks>
@@ -25,7 +25,7 @@ namespace NuGit.Infrastructure
     {
 
         public ConsoleApplicationTraceListener()
-            : base()
+            : base(true)
         {
             Quiet = false;
         }
