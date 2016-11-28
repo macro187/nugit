@@ -7,7 +7,6 @@ using System.Reflection;
 using NuGit.Infrastructure;
 using NuGit.Git;
 using NuGit.Workspaces;
-using NuGit.VisualStudio;
 
 namespace NuGit
 {
@@ -31,9 +30,6 @@ namespace NuGit
                     string swch = args.Dequeue().ToUpperInvariant();
                     switch (swch)
                     {
-                        case "--QUIET":
-                            traceListener.Quiet = true;
-                            break;
                         default:
                             Usage();
                             throw new UserErrorException("Unrecognised switch '" + swch + "'"); 
@@ -110,11 +106,11 @@ namespace NuGit
             var copyright = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).LegalCopyright;
             var authors = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).CompanyName;
             Trace.TraceInformation("");
-            Trace.TraceInformation("--------------------------------------");
+            Trace.TraceInformation("======================================");
             Trace.TraceInformation("{0} - {1}", name, description);
             Trace.TraceInformation("Version {0}.{1}", major, minor);
             Trace.TraceInformation("{0} {1}", copyright, authors);
-            Trace.TraceInformation("--------------------------------------");
+            Trace.TraceInformation("======================================");
 
         }
 
@@ -126,40 +122,14 @@ namespace NuGit
         static void Usage()
         {
             Trace.WriteLine("");
-            Trace.WriteLine("SYNOPSIS");
-            Trace.WriteLine("");
-            Trace.WriteLine("  NuGit.exe [--quiet] <command> [<args>]");
-            Trace.WriteLine("");
-            Trace.WriteLine("OPTIONS");
-            Trace.WriteLine("");
-            Trace.WriteLine("  --quiet");
-            Trace.WriteLine("    Mute unnecessary output");
-            Trace.WriteLine("");
-            Trace.WriteLine("  <command>");
-            Trace.WriteLine("    The NuGit command to execute");
-            Trace.WriteLine("");
-            Trace.WriteLine("  <args>");
-            Trace.WriteLine("    Command-specific options and arguments");
-            Trace.WriteLine("");
-            Trace.WriteLine("COMMANDS");
-            Trace.WriteLine("");
-            Trace.WriteLine("  help");
-            Trace.WriteLine("    Display NuGit command line usage information");
-            Trace.WriteLine("");
-            Trace.WriteLine("  restore");
-            Trace.WriteLine("    Restore dependencies for the current repository");
-            Trace.WriteLine("");
-            Trace.WriteLine("  clone <url> [<version>]");
-            Trace.WriteLine("    Clone a repository into the current workspace and restore its dependencies");
-            Trace.WriteLine("");
-            Trace.WriteLine("    <url>");
-            Trace.WriteLine("      URL of repository to clone");
-            Trace.WriteLine("");
-            Trace.WriteLine("    <version>");
-            Trace.WriteLine("      Commit to use (default master)");
-            Trace.WriteLine("");
-            Trace.WriteLine("  install");
-            Trace.WriteLine("    (Re)install dependencies into current repository's Visual Studio solution");
+            using (var reader = new StreamReader(
+                Assembly.GetCallingAssembly().GetManifestResourceStream("NuGit.readme.md")))
+            {
+                while (!reader.EndOfStream)
+                {
+                    Trace.WriteLine(reader.ReadLine());
+                }
+            }
         }
 
 
