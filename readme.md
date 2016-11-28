@@ -13,6 +13,20 @@ simpler replacement for the dependency management functionality of NuGet, hence
 the play on its name.
 
 
+.nugit Files
+============
+
+.nugit files are plain text files containing Git repository URLs, one per line,
+each optionally suffixed with a hash `#` character followed by a Git revision.
+Empty lines and lines beginning with hash characters are ignored.
+
+    # Example .nugit file
+    https://example.com/example1.git
+    https://example.com/example2.git#master
+    https://example.com/example3.git#v1.0
+    https://example.com/example4.git#2482911091ab7219ba544aeb6969f07904a2d1b0
+
+
 Synopsis
 ========
 
