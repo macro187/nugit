@@ -17,8 +17,8 @@ the play on its name.
 ============
 
 .nugit files are plain text files containing Git repository URLs, one per line,
-each optionally suffixed with a hash `#` character followed by a Git revision.
-Empty lines and lines beginning with hash characters are ignored.
+each optionally suffixed with a hash `#` character and a Git revision.  Empty
+lines and lines beginning with hash characters are ignored.
 
     # Example .nugit file
     https://example.com/example1.git
