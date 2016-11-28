@@ -106,11 +106,11 @@ namespace NuGit
             var copyright = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).LegalCopyright;
             var authors = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).CompanyName;
             Trace.TraceInformation("");
-            Trace.TraceInformation("======================================");
-            Trace.TraceInformation("{0} - {1}", name, description);
-            Trace.TraceInformation("Version {0}.{1}", major, minor);
+            Trace.TraceInformation("==============================");
+            Trace.TraceInformation("{0} v{1}.{2}", name, major, minor);
+            Trace.TraceInformation(description);
             Trace.TraceInformation("{0} {1}", copyright, authors);
-            Trace.TraceInformation("======================================");
+            Trace.TraceInformation("==============================");
 
         }
 
@@ -121,6 +121,7 @@ namespace NuGit
         ///
         static void Usage()
         {
+            Trace.WriteLine("");
             Trace.WriteLine("");
             using (var reader = new StreamReader(
                 Assembly.GetCallingAssembly().GetManifestResourceStream("NuGit.readme.md")))
