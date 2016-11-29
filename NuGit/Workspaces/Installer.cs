@@ -24,7 +24,8 @@ namespace NuGit.Workspaces
         /// </summary>
         ///
         static readonly string[] DependencyTypeBlackList = {
-            VisualStudioProjectReference.SolutionFolderTypeId,
+            VisualStudioProjectTypeIds.SolutionFolder,
+            VisualStudioProjectTypeIds.Test,
         };
 
 
@@ -71,6 +72,7 @@ namespace NuGit.Workspaces
                         .Where(p => !string.IsNullOrWhiteSpace(p.Location))
                         .Where(p => !Path.IsPathRooted(p.Location))
                         .Where(p => !p.Location.StartsWith("..", StringComparison.Ordinal))
+                        .Where(p => !p.GetProject().ProjectTypeGuids.Intersect(DependencyTypeBlackList).Any())
                         .OrderBy(p => p.Name)
                         .ToList();
                 if (dependencyProjects.Count == 0)
