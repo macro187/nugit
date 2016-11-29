@@ -166,7 +166,7 @@ namespace NuGit.VisualStudio
         ///
         public IEnumerable<VisualStudioProjectReference> SolutionFolders
         {
-            get { return ProjectReferences.Where(p => p.TypeId == VisualStudioProjectReference.SolutionFolderTypeId); }
+            get { return ProjectReferences.Where(p => p.TypeId == VisualStudioProjectTypeIds.SolutionFolder); }
         }
 
 
@@ -371,7 +371,7 @@ namespace NuGit.VisualStudio
             var id = Guid.NewGuid().ToString("B").ToUpperInvariant();
 
             AddProjectReference(
-                VisualStudioProjectReference.SolutionFolderTypeId,
+                VisualStudioProjectTypeIds.SolutionFolder,
                 name,
                 name,
                 id);
@@ -393,7 +393,7 @@ namespace NuGit.VisualStudio
             if (solutionFolder == null)
                 throw new ArgumentNullException("solutionFolder");
 
-            if (solutionFolder.TypeId != VisualStudioProjectReference.SolutionFolderTypeId)
+            if (solutionFolder.TypeId != VisualStudioProjectTypeIds.SolutionFolder)
                 throw new ArgumentException("Not a solution folder", "solutionFolder");
 
             var solutionFolderId = solutionFolder.Id;
@@ -410,7 +410,7 @@ namespace NuGit.VisualStudio
                         .FirstOrDefault();
                 if (childProject == null) break;
                 
-                if (childProject.TypeId == VisualStudioProjectReference.SolutionFolderTypeId)
+                if (childProject.TypeId == VisualStudioProjectTypeIds.SolutionFolder)
                 {
                     DeleteSolutionFolder(childProject);
                 }
@@ -561,7 +561,13 @@ namespace NuGit.VisualStudio
                     {
                         _projectReferences.Add(
                             new VisualStudioProjectReference(
-                                id, typeId, name, location, projectReferenceStartLineNumber, lineNumber - projectReferenceStartLineNumber + 1));
+                                this,
+                                id,
+                                typeId,
+                                name,
+                                location,
+                                projectReferenceStartLineNumber,
+                                lineNumber - projectReferenceStartLineNumber + 1));
                         projectReferenceStartLineNumber = -1;
                         id = "";
                         typeId = "";

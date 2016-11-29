@@ -66,6 +66,8 @@
     <Compile Include="VisualStudio\VisualStudioProjectConfiguration.cs" />
     <Compile Include="VisualStudio\VisualStudioNestedProject.cs" />
     <Compile Include="VisualStudio\VisualStudioProjectReference.cs" />
+    <Compile Include="VisualStudio\VisualStudioProject.cs" />
+    <Compile Include="VisualStudio\VisualStudioProjectTypeIds.cs" />
     <Compile Include="VisualStudio\VisualStudioSolution.cs" />
     <Compile Include="Workspaces\Installer.cs" />
     <Compile Include="Workspaces\DotNuGit.cs" />

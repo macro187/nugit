@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using NuGit.Infrastructure;
 
 namespace NuGit.VisualStudio
@@ -20,10 +21,8 @@ namespace NuGit.VisualStudio
     public class VisualStudioProjectReference
     {
 
-        public static readonly string SolutionFolderTypeId = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
-
-
         public VisualStudioProjectReference(
+            VisualStudioSolution solution,
             string id,
             string typeId,
             string name,
@@ -31,6 +30,13 @@ namespace NuGit.VisualStudio
             int lineNumber,
             int lineCount)
         {
+            if (solution == null) throw new ArgumentNullException("solution");
+            if (id == null) throw new ArgumentNullException("id");
+            if (typeId == null) throw new ArgumentNullException("typeId");
+            if (name == null) throw new ArgumentNullException("name");
+            if (location == null) throw new ArgumentNullException("location");
+
+            Solution = solution;
             Id = id;
             TypeId = typeId;
             Name = name;
@@ -38,6 +44,9 @@ namespace NuGit.VisualStudio
             LineNumber = lineNumber;
             LineCount = lineCount;
         }
+
+
+        public VisualStudioSolution Solution { get; private set; }
         
 
         public string Id { get; private set; }
@@ -56,6 +65,28 @@ namespace NuGit.VisualStudio
 
 
         public int LineCount { get; private set; }
+
+
+        /// <summary>
+        /// Load the project referred to by this reference
+        /// </summary>
+        ///
+        /// <seealso cref="VisualStudioProject(string)"/>
+        ///
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design",
+            "CA1024:UsePropertiesWhereAppropriate",
+            Justification = "Significant operation involving reading from disk")]
+        public VisualStudioProject GetProject()
+        {
+            var path =
+                Path.GetFullPath(
+                    Path.Combine(
+                        Path.GetDirectoryName(Solution.Path),
+                        Location));
+
+            return new VisualStudioProject(path);
+        }
 
 
         public static string FormatStart(string typeId, string name, string location, string id)

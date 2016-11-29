@@ -32,6 +32,18 @@ namespace NuGit.Infrastructure
             foreach (T item in items.Reverse()) list.Insert(index, item);
         }
 
+
+        /// <summary>
+        /// Add item(s) to a collection
+        /// </summary>
+        ///
+        public static void AddRange<T>(this ICollection<T> collection, IEnumerable<T> items)
+        {
+            if (collection == null) throw new ArgumentNullException("collection");
+            if (items == null) throw new ArgumentNullException("items");
+            foreach (T item in items) collection.Add(item);
+        }
+
     }
 
 }
