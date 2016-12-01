@@ -53,6 +53,10 @@ namespace NuGit.Workspaces
 
         static void Install(Repository repository, VisualStudioSolution sln, GitRepositoryName dependencyName)
         {
+            var slnLocalPath = GetLocalPath(repository.RootPath, Path.GetDirectoryName(sln.Path));
+            var slnLocalPathComponents = SplitPath(slnLocalPath);
+            var slnToWorkspacePath = Path.Combine(Enumerable.Repeat("..", slnLocalPathComponents.Length + 1).ToArray());
+
             using (TraceExtensions.Step("Installing projects from " + dependencyName))
             {
                 var dependencyRepository = repository.Workspace.GetRepository(dependencyName);
@@ -64,6 +68,9 @@ namespace NuGit.Workspaces
                     return;
                 }
                 Trace.TraceInformation("Found " + Path.GetFileName(dependencySln.Path));
+
+                var dependencySlnLocalPath =
+                    GetLocalPath(dependencyRepository.RootPath, Path.GetDirectoryName(dependencySln.Path));
 
                 var dependencyProjects =
                     dependencySln.ProjectReferences
@@ -99,7 +106,7 @@ namespace NuGit.Workspaces
                     sln.AddProjectReference(
                         p.TypeId,
                         p.Name,
-                        Path.Combine("..", dependencyName, p.Location),
+                        Path.Combine(slnToWorkspacePath, dependencyName, dependencySlnLocalPath, p.Location),
                         p.Id);
 
                     //
@@ -134,6 +141,38 @@ namespace NuGit.Workspaces
                     sln.DeleteSolutionFolder(folder);
                 }
             }
+        }
+
+
+        static string[] SplitPath(string path)
+        {
+            if (path == null) throw new ArgumentNullException("path");
+            return path.Split(
+                new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar },
+                StringSplitOptions.RemoveEmptyEntries);
+        }
+
+
+        static string GetLocalPath(string fromPath, string toPath)
+        {
+            if (fromPath == null)
+                throw new ArgumentNullException("fromPath");
+            if (toPath == null)
+                throw new ArgumentNullException("toPath");
+            if (toPath == fromPath)
+                return "";
+
+            var fromPathComponents = SplitPath(fromPath);
+            var toPathComponents = SplitPath(toPath);
+
+            if (!fromPathComponents.SequenceEqual(
+                toPathComponents.Take(fromPathComponents.Length),
+                StringComparer.Ordinal))
+            {
+                throw new ArgumentException("toPath isn't under fromPath", "toPath");
+            }
+
+            return Path.Combine(toPathComponents.Skip(fromPathComponents.Length).ToArray());
         }
 
     }
