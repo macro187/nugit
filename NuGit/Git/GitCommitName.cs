@@ -41,7 +41,7 @@ namespace NuGit.Git
                 throw new FormatException("Empty string");
              if (gitCommitString.Contains(' '))
                 throw new FormatException("Contains whitespace");
-             if (!Regex.IsMatch(gitCommitString, @"^[A-Za-z0-9_.-/]+$"))
+             if (!Regex.IsMatch(gitCommitString, @"^[-A-Za-z0-9_./]+$"))
                 throw new FormatException("Contains invalid characters");
 
              _value = gitCommitString;
