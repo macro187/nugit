@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -42,10 +43,25 @@ namespace NuGit.VisualStudio
             if (!Directory.Exists(directoryPath))
                 throw new ArgumentException("Directory doesn't exist", "directoryPath");
 
-            var slnPaths = Directory.GetFiles(directoryPath, "*.sln");
-            if (slnPaths.Length == 0)
+            IList<string> slnPaths = Directory.GetFiles(directoryPath, "*.sln");
+
+            if (slnPaths.Count == 0)
+            {
+                var srcPath = System.IO.Path.Combine(directoryPath, "src");
+                if (Directory.Exists(srcPath))
+                {
+                    slnPaths = Directory.GetFiles(srcPath, "*.sln");
+                    if (slnPaths.Count > 0)
+                    {
+                        Trace.TraceWarning("No .sln found in repo root but found in src/");
+                    }
+                }
+            }
+
+            if (slnPaths.Count == 0)
                 return null;
-            if (slnPaths.Length > 1)
+
+            if (slnPaths.Count > 1)
                 throw new UserErrorException(
                     StringExtensions.FormatInvariant(
                         "More than one .sln found in {0}",
