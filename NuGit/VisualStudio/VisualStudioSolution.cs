@@ -43,46 +43,23 @@ namespace NuGit.VisualStudio
             if (!Directory.Exists(directoryPath))
                 throw new ArgumentException("Directory doesn't exist", "directoryPath");
 
-            IList<string> slns = Directory.GetFiles(directoryPath, "*.sln");
+            string slnDir = System.IO.Path.Combine(directoryPath, ".nugit");
 
-            if (slns.Count == 0)
-            {
-                var srcPath = System.IO.Path.Combine(directoryPath, "src");
-                if (Directory.Exists(srcPath))
-                {
-                    slns = Directory.GetFiles(srcPath, "*.sln");
-                    if (slns.Count > 0)
-                    {
-                        Trace.TraceWarning("No .sln found in repo root but found in src/");
-                    }
-                }
-            }
+            if (!Directory.Exists(slnDir))
+                slnDir = directoryPath;
 
-            if (slns.Count == 0)
-                return null;
-
-            if (slns.Count == 1)
-                return new VisualStudioSolution(slns[0]);
-
-            var nugitSlns = slns.Where(p => p.EndsWith(".nugit.sln", StringComparison.OrdinalIgnoreCase)).ToList();
-
-            if (nugitSlns.Count == 1)
-                return new VisualStudioSolution(nugitSlns[0]);
-
-            if (nugitSlns.Count > 1)
-                throw new UserErrorException(
-                    StringExtensions.FormatInvariant(
-                        "More than one .nugit.sln found in {0}",
-                        directoryPath));
+            IList<string> slns = Directory.GetFiles(slnDir, "*.sln");
 
             if (slns.Count > 1)
                 throw new UserErrorException(
                     StringExtensions.FormatInvariant(
                         "More than one .sln found in {0}",
-                        directoryPath));
+                        slnDir));
 
-            //if (nugitSlns.Count == 0)
+            if (slns.Count == 0)
                 return null;
+
+            return new VisualStudioSolution(slns[0]);
         }
 
 

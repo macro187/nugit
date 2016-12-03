@@ -70,8 +70,16 @@ namespace NuGit.Workspaces
             Justification = "Emphasise that information is reread on each call")]
         public DotNuGit GetDotNuGit()
         {
-            string path = Path.Combine(RootPath, ".nugit");
-            if (!File.Exists(path)) return new DotNuGit();
+            string dotNuGitDir = Path.Combine(RootPath, ".nugit");
+
+            if (!Directory.Exists(dotNuGitDir))
+                dotNuGitDir = RootPath;
+            
+            string path = Path.Combine(dotNuGitDir, ".nugit");
+
+            if (!File.Exists(path))
+                return new DotNuGit();
+
             try
             {
                 return DotNuGitParser.Parse(File.ReadLines(path));
