@@ -1,24 +1,43 @@
 Description
 ===========
 
-NuGit is a tool that reads files named .nugit located in the root directories
-of Git repositories and, according to the Git URLs listed there, fetches and
-checks out particular revisions of other Git repositories as siblings.  It does
+NuGit is a tool that reads Git URLs from `.nugit` files in Git repositories
+and then fetches and checks out those Git repositories as siblings.  It does
 this recursively, thereby restoring all directly and transitively required Git
 repositories to their specified revisions.
 
-NuGit is suitable for use with Git repositories containing any kind of content.
-In addition, it provides .NET-specific functionality aimed at making it a much
-simpler replacement for the dependency management functionality of NuGet, hence
-the play on its name.
+In addition, NuGit provides .NET-specific functionality allowing it to serve
+as a much simpler replacement for NuGet, hence the play on its name.
 
 
-.nugit Files
-============
+Usage
+=====
 
-.nugit files are plain text files containing Git repository URLs, one per line,
-each optionally suffixed with a hash `#` character and a Git revision.  Empty
-lines and lines beginning with hash characters are ignored.
+List URLs of required Git repositories in a `.nugit` file in the root
+directory of your repository.
+
+Run `nugit restore` from within your repository.  NuGit will fetch and check
+out the repositories listed, then do the same for all of them, recursively.
+
+If you are doing .NET development, run `nugit install` from within your
+repository.  NuGit will restore all required Git repositories as above, and
+then add (most) .NET projects from those repositories to your Visual Studio
+solution, organised into solution folders by repository.  Add project
+references to them as required.  Re-run `nugit install` any time to refresh
+the projects in your solution.
+
+If you want to make an existing .NET repository work with NuGit without
+affecting how it currently works, put your `.nugit` file inside a `.nugit/`
+subdirectory along with a NuGit-specific Visual Studio solution and
+project(s).  If present, NuGit will use them instead.
+
+
+File Format
+===========
+
+`.nugit` files are plain text files containing Git repository URLs, one per
+line, each optionally suffixed with a hash `#` character and a Git revision.
+Empty lines and lines beginning with hash characters are ignored.
 
     # Example .nugit file
     https://example.com/example1.git
@@ -49,7 +68,7 @@ Commands
         Clone and checkout the specified revisions of the Git repositories
         listed in the current repository's .nugit file, then do the same,
         recursively, for each
-        
+
     clone <url> [<version>]
         Clone a repository into the current workspace and restore its required
         repositories as per the restore command
