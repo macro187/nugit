@@ -1,20 +1,21 @@
 Description
 ===========
 
-NuGit is a "package" manager that works with regular Git repositories instead
-of binary packages.
+NuGit is a software development "package" manager that works with regular Git
+repositories instead of binary packages.
 
 NuGit operates according to `.nugit` files placed (usually) in the root
 directories of Git repositories.  These files contain lists of other Git
 repositories required, optionally with particular revisions.  When run, NuGit
 recursively fetches and checks out those Git repositories as siblings, thereby
-restoring all directly and transitively required Git repositories to the
-specified revisions.
+restoring all directly and transitively required Git repositories at the
+required revisions.
 
-In addition, NuGit provides .NET-specific functionality to add projects from
-required repositories to Visual Studio solutions so they can be easily used
-via project references.  These features allow NuGit serve as a simplified
-replacement for NuGet, hence the play on its name.
+Although NuGit works with all kinds of Git repositories, it includes
+.NET-specific functionality for adding projects from required repositories to
+Visual Studio solutions so they can be easily used via project references.
+This makes it suitable for use as a simplified, source code-based replacement
+for NuGet, hence the play on its name.
 
 
 Usage
