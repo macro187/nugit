@@ -1,13 +1,20 @@
 Description
 ===========
 
-NuGit is a tool that reads Git URLs from `.nugit` files in Git repositories
-and then fetches and checks out those Git repositories as siblings.  It does
-this recursively, thereby restoring all directly and transitively required Git
-repositories to their specified revisions.
+NuGit is a "package" manager that works with regular Git repositories instead
+of binary packages.
 
-In addition, NuGit provides .NET-specific functionality allowing it to serve
-as a much simpler replacement for NuGet, hence the play on its name.
+NuGit operates according to `.nugit` files placed (usually) in the root
+directories of Git repositories.  These files contain lists of other Git
+repositories required, optionally with particular revisions.  When run, NuGit
+recursively fetches and checks out those Git repositories as siblings, thereby
+restoring all directly and transitively required Git repositories to the
+specified revisions.
+
+In addition, NuGit provides .NET-specific functionality to add projects from
+required repositories to Visual Studio solutions so they can be easily used
+via project references.  These features allow NuGit serve as a simplified
+replacement for NuGet, hence the play on its name.
 
 
 Usage
