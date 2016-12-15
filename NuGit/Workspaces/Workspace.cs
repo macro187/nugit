@@ -14,36 +14,6 @@ namespace NuGit.Workspaces
     {
 
         /// <summary>
-        /// Locate a workspace given a path contained within it
-        /// </summary>
-        ///
-        /// <param name="containedPath">
-        /// A path that may be contained within a workspace
-        /// </param>
-        ///
-        /// <returns>
-        /// The workspace the path is in
-        /// - OR -
-        /// <c>null</c> if the path is not in a workspace
-        /// </returns>
-        ///
-        public static Workspace LocateFrom(string containedPath)
-        {
-            if (containedPath == null) throw new ArgumentNullException("containedPath");
-
-            string path = Path.GetFullPath(containedPath);
-            while (true)
-            {
-                string parent = Path.GetDirectoryName(path);
-                if (parent == path) break;
-                if (Directory.Exists(Path.Combine(path, ".git"))) return new Workspace(parent);
-                path = parent;
-            }
-            return null;
-        }
-
-
-        /// <summary>
         /// Initialise a new workspace
         /// </summary>
         ///
