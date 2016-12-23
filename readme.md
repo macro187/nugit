@@ -46,23 +46,18 @@ File Format
 `.nugit` files are plain text files.  Empty lines and lines beginning with
 hash characters are ignored.
 
-    # Example .nugit file
+    #
+    # Required Git repositories
+    #
     https://example.com/example1.git
     https://example.com/example2.git#master
     https://example.com/example3.git#v1.0
     https://example.com/example4.git#2482911091ab7219ba544aeb6969f07904a2d1b0
 
-    program: path/to/program.exe
-
-Entries
--------
-
-    <giturl>[#<revision>]
-        URL to a required Git repository, optionally including a specific
-        revision (branch, tag, hash, etc.)
-
-    program: <path>
-        Relative path to a program
+    #
+    # Programs provided by this repository
+    #
+    program: relative/path/to/program.exe
 
 
 Synopsis
