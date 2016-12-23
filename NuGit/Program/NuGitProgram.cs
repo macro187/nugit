@@ -64,6 +64,8 @@ namespace NuGit
                         return Clone(args);
                     case "INSTALL":
                         return Install(args);
+                    case "PROGRAMS":
+                        return Programs(args);
                     default:
                         Usage();
                         throw new UserErrorException("Unrecognised <command>");
@@ -197,6 +199,29 @@ namespace NuGit
             if (repository == null) throw new UserErrorException("Not in a repository");
 
             Installer.Install(repository);
+
+            return 0;
+        }
+
+
+        /// <summary>
+        /// The <c>programs</c> command
+        /// </summary>
+        ///
+        static int Programs(Queue<string> args)
+        {
+            if (args.Any()) throw new UserErrorException("Too many arguments");
+
+            var repository = WhereAmI();
+
+            if (repository != null)
+            {
+                ProgramWrapperGenerator.GenerateProgramWrappers(repository);
+            }
+            else
+            {
+                ProgramWrapperGenerator.GenerateProgramWrappers(new Workspace(Environment.CurrentDirectory));
+            }
 
             return 0;
         }

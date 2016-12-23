@@ -13,6 +13,16 @@ namespace NuGit.Workspaces
     public class Repository
     {
 
+        /// <summary>
+        /// Determine whether a directory is a Git repository
+        /// </summary>
+        ///
+        public static bool IsRepository(string directoryPath)
+        {
+            return Directory.Exists(Path.Combine(directoryPath, ".git"));
+        }
+
+
         internal Repository(Workspace workspace, GitRepositoryName name)
         {
             if (workspace == null) throw new ArgumentNullException("workspace");

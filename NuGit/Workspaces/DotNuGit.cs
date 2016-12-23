@@ -15,15 +15,17 @@ namespace NuGit.Workspaces
     {
 
         public DotNuGit()
-            : this(new GitDependencyInfo[0])
+            : this(new GitDependencyInfo[0], new string[0])
         {
         }
 
 
-        public DotNuGit(IEnumerable<GitDependencyInfo> dependencies)
+        public DotNuGit(IEnumerable<GitDependencyInfo> dependencies, IEnumerable<string> programs)
         {
             if (dependencies == null) throw new ArgumentNullException("dependencies");
+            if (programs == null) throw new ArgumentNullException("programs");
             Dependencies = new ReadOnlyCollection<GitDependencyInfo>(dependencies.ToList());
+            Programs = new ReadOnlyCollection<string>(programs.ToList());
         }
 
 
@@ -32,6 +34,17 @@ namespace NuGit.Workspaces
         /// </summary>
         ///
         public IList<GitDependencyInfo> Dependencies
+        {
+            get;
+            private set;
+        }
+
+
+        /// <summary>
+        /// Relative paths to program executables in this repository
+        /// </summary>
+        ///
+        public ICollection<string> Programs
         {
             get;
             private set;

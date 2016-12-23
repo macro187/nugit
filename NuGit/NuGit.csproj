@@ -69,6 +69,7 @@
     <Compile Include="VisualStudio\VisualStudioProject.cs" />
     <Compile Include="VisualStudio\VisualStudioProjectTypeIds.cs" />
     <Compile Include="VisualStudio\VisualStudioSolution.cs" />
+    <Compile Include="Workspaces\ProgramWrapperGenerator.cs" />
     <Compile Include="Workspaces\Installer.cs" />
     <Compile Include="Workspaces\DotNuGit.cs" />
     <Compile Include="Infrastructure\FileParseException.cs" />

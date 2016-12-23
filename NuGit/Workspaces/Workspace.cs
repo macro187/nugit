@@ -2,6 +2,8 @@
 using System.IO;
 using NuGit.Infrastructure;
 using NuGit.Git;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace NuGit.Workspaces
 {
@@ -12,6 +14,14 @@ namespace NuGit.Workspaces
     ///
     public class Workspace
     {
+
+        /// <summary>
+        /// Name of special workspace subdirectory containing wrapper scripts for running programs in the repositories
+        /// in the workspace
+        /// </summary>
+        ///
+        const string ProgramWrapperDirectoryName = ".bin";
+
 
         /// <summary>
         /// Initialise a new workspace
@@ -89,10 +99,51 @@ namespace NuGit.Workspaces
             if (name == null) throw new ArgumentNullException("name");
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Blank", "name");
 
-            if (!Directory.Exists(Path.Combine(RootPath, name))) return null;
-
-            // TODO Cache
+            if (!Repository.IsRepository(Path.Combine(RootPath, name))) return null;
             return new Repository(this, name);
+        }
+
+
+        /// <summary>
+        /// Locate all repositories in the workspace
+        /// </summary>
+        ///
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design",
+            "CA1024:UsePropertiesWhereAppropriate",
+            Justification = "Not static, this is re-read from disk each call")]
+        public IEnumerable<Repository> GetRepositories()
+        {
+            return
+                Directory.EnumerateDirectories(RootPath)
+                    .Where(path => Repository.IsRepository(path))
+                    .Select(path => new GitRepositoryName(Path.GetFileName(path)))
+                    .Select(name => new Repository(this, name));
+        }
+
+
+        /// <summary>
+        /// Get full path to (and if necessary create) a special workspace subdirectory for wrapper scripts that run
+        /// programs in the repositories in the workspace
+        /// </summary>
+        ///
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design",
+            "CA1024:UsePropertiesWhereAppropriate",
+            Justification = "This method can have side-effects")]
+        public string GetProgramWrapperDirectory()
+        {
+            var path = Path.Combine(RootPath, ProgramWrapperDirectoryName);
+            
+            if (!Directory.Exists(path))
+            {
+                using (TraceExtensions.Step("Creating " + path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+            }
+            
+            return path;
         }
 
     }

@@ -43,15 +43,26 @@ project(s).  If present, NuGit will use them instead.
 File Format
 ===========
 
-`.nugit` files are plain text files containing Git repository URLs, one per
-line, each optionally suffixed with a hash `#` character and a Git revision.
-Empty lines and lines beginning with hash characters are ignored.
+`.nugit` files are plain text files.  Empty lines and lines beginning with
+hash characters are ignored.
 
     # Example .nugit file
     https://example.com/example1.git
     https://example.com/example2.git#master
     https://example.com/example3.git#v1.0
     https://example.com/example4.git#2482911091ab7219ba544aeb6969f07904a2d1b0
+
+    program: path/to/program.exe
+
+Entries
+-------
+
+    <giturl>[#<revision>]
+        URL to a required Git repository, optionally including a specific
+        revision (branch, tag, hash, etc.)
+
+    program: <path>
+        Relative path to a program
 
 
 Synopsis
@@ -91,3 +102,9 @@ Commands
         Install Visual Studio projects from all required repositories into the
         current repository's Visual Studio solution, organised into solution
         folders by repository name
+
+    programs
+        Build or update program wrapper scripts in `<workspace>/.bin` for
+        programs in the current repository (if run from a repository) or
+        programs in all repositories (if run from a workspace)
+
