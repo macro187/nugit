@@ -128,9 +128,14 @@ namespace NuGit
             using (var reader = new StreamReader(
                 Assembly.GetCallingAssembly().GetManifestResourceStream("NuGit.readme.md")))
             {
-                while (!reader.EndOfStream)
+                foreach (
+                    var line
+                    in ReadmeParser.SelectSections(
+                        reader.ReadAllLines(),
+                        "Synopsis",
+                        "Commands"))
                 {
-                    Trace.WriteLine(reader.ReadLine());
+                    Trace.WriteLine(line);
                 }
             }
         }
