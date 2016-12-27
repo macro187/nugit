@@ -63,10 +63,10 @@ The NuGit `install` command maintains solution folders in your Visual Studio
 solution containing projects from all required repositories.  Add project
 references to them as needed.
 
-Whenver you add or remove dependencies, update the solution folders by
+Whenever you add or remove dependencies, update the solution folders by
 re-running the `install` command.
 
-NuGit does not include unnecessary projects such as unit test suites, etc.
+NuGit does not include unnecessary projects such as unit test suites.
 
 
 Exported Programs
@@ -201,6 +201,8 @@ Ron MacNeil \<<https://github.com/macro187>\>
 
 Continuous Integration
 ======================
+
+### Appveyor (Windows)
 
 [![Build status](https://ci.appveyor.com/api/projects/status/f3ng94vkp9kqkska?svg=true)](https://ci.appveyor.com/project/macro187/nugit)
 
