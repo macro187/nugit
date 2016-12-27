@@ -1,63 +1,125 @@
+NuGit
+=====
+
+A software development dependency manager that works with Git repositories
+instead of binary packages.
+
+
 Description
 ===========
 
-NuGit is a software development "package" manager that works with regular Git
-repositories instead of binary packages.
+The core functionality works with any Git repository, but NuGit also includes
+.NET-specific functionality making it suitable for use as a simplified
+replacement for NuGet, hence the play on its name.
 
-NuGit operates according to `.nugit` files placed (usually) in the root
-directories of Git repositories.  These files contain lists of other Git
-repositories required, optionally with particular revisions.  When run, NuGit
-recursively fetches and checks out those Git repositories as siblings, thereby
-restoring all directly and transitively required Git repositories at the
-required revisions.
-
-Although NuGit works with all kinds of Git repositories, it includes
-.NET-specific functionality for adding projects from required repositories to
-Visual Studio solutions so they can be easily used via project references.
-This makes it suitable for use as a simplified, source code-based replacement
-for NuGet, hence the play on its name.
+NuGit is controlled by plain-text `.nugit` files located in the root
+directories of Git repositories.
 
 
-Usage
-=====
+Requirements
+============
 
-List URLs of required Git repositories in a `.nugit` file in the root
-directory of your repository.
-
-Run `nugit restore` from within your repository.  NuGit will fetch and check
-out the repositories listed, then do the same for all of them, recursively.
-
-If you are doing .NET development, run `nugit install` from within your
-repository.  NuGit will restore all required Git repositories as above, and
-then add (most) .NET projects from those repositories to your Visual Studio
-solution, organised into solution folders by repository.  Add project
-references to them as required.  Re-run `nugit install` any time to refresh
-the projects in your solution.
-
-If you want to make an existing .NET repository work with NuGit without
-affecting how it currently works, put your `.nugit` file inside a `.nugit/`
-subdirectory along with a NuGit-specific Visual Studio solution and
-project(s).  If present, NuGit will use them instead.
+Microsoft .NET Framework v4.0 or newer.
 
 
-File Format
-===========
+Features
+========
 
-`.nugit` files are plain text files.  Empty lines and lines beginning with
-hash characters are ignored.
+Dependency Management
+---------------------
 
-    #
-    # Required Git repositories
-    #
-    https://example.com/example1.git
-    https://example.com/example2.git#master
-    https://example.com/example3.git#v1.0
-    https://example.com/example4.git#2482911091ab7219ba544aeb6969f07904a2d1b0
+NuGit makes it easy to use other Git repositories from your own.
 
-    #
-    # Programs provided by this repository
-    #
-    program: relative/path/to/program.exe
+Specify URLs of other Git repositories you require in your own `.nugit` file:
+
+    C:\workspace\myrepo> type .nugit
+
+    https://example.com/repoa.git#master
+    https://example.com/repob.git#v2
+    ...
+
+Based on that information, the NuGit `restore` command makes all required
+repositories available as peers to your own, at the required revisions,
+including transitive dependencies:
+
+    C:\workspace\myrepo> nugit restore
+
+    ...
+
+    C:\workspace\myrepo> dir /b ..
+
+    repoa
+    repob
+    repoc
+    repod
+    myrepo
+
+
+Visual Studio Projects
+----------------------
+
+NuGit makes it easy to use .NET projects from other Git repositories.
+
+The NuGit `install` command maintains solution folders in your Visual Studio
+solution containing projects from all required repositories.  Add project
+references to them as needed.
+
+Whenver you add or remove dependencies, update the solution folders by
+re-running the `install` command.
+
+NuGit does not include unnecessary projects such as unit test suites, etc.
+
+
+Exported Programs
+-----------------
+
+NuGit makes it easy to use programs from your repositories.
+
+Specify paths to exportable programs in your `.nugit` file:
+
+    C:\workspace\myrepo> type .nugit
+
+    ...
+    program: MyProgram/bin/Debug/MyProgram.exe
+
+Based on that information, the NuGit `programs` command maintains a `.bin`
+directory containing executable wrapper scripts that run your programs
+in-place.  Scripts for both Windows *cmd.exe* and Unix *bash* are maintained:
+
+    C:\workspace\myrepo> nugit programs
+
+    ...
+
+    C:\workspace\myrepo> dir /b ..\.bin
+
+    MyProgram
+    MyProgram.cmd
+
+    C:\workspace\myrepo> type ..\.bin\MyProgram
+
+    #!/bin/bash
+    "$(dirname $0)/../myrepo/MyProgram/bin/Debug/MyProgram.exe" "$@"
+
+    C:\workspace\myrepo> type ..\.bin\MyProgram.cmd
+
+    @"%~dp0..\myrepo\MyProgram\bin\Debug\MyProgram.exe" %*
+
+Running the NuGit `programs` command from your workspace builds scripts for
+all programs in all repositories and cleans up orphan scripts.
+
+Adding the `.bin` directory to your system path makes exported programs
+available throughout your system.
+
+
+Stealth Mode
+------------
+
+NuGit can be used without affecting how your existing repository works.
+
+If you put your `.nugit` file inside a `.nugit/` subdirectory along with a
+NuGit-specific Visual Studio solution and project(s), NuGit uses them instead.
+Your NuGit-specific solution and projects can use NuGit-style dependencies
+(and be used as such) and the rest of your repository remains unchanged.
 
 
 Synopsis
@@ -102,4 +164,44 @@ Commands
         Build or update program wrapper scripts in `<workspace>/.bin` for
         programs in the current repository (if run from a repository) or
         programs in all repositories (if run from a workspace)
+
+
+File Format
+===========
+
+`.nugit` files are plain text files.  Empty lines and lines beginning with
+hash characters are ignored.
+
+    #
+    # Required Git repositories
+    #
+    https://example.com/example1.git
+    https://example.com/example2.git#master
+    https://example.com/example3.git#v1.0
+    https://example.com/example4.git#2482911091ab7219ba544aeb6969f07904a2d1b0
+
+    #
+    # Programs provided by this repository
+    #
+    program: Foo/bin/Debug/Foo.exe
+    program: Bar/bin/Debug/Bar.exe
+
+
+License
+=======
+
+[MIT License](https://github.com/macro187/nugit/blob/master/license.txt)
+
+
+Copyright
+=========
+
+Copyright (c) 2016  
+Ron MacNeil \<<https://github.com/macro187>\>  
+
+
+Continuous Integration
+======================
+
+[![Build status](https://ci.appveyor.com/api/projects/status/f3ng94vkp9kqkska?svg=true)](https://ci.appveyor.com/project/macro187/nugit)
 
