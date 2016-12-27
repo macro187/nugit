@@ -1,8 +1,7 @@
 NuGit
 =====
 
-A software development dependency manager that works with Git repositories
-instead of binary packages.
+A Git-based dependency manager.
 
 
 Description
