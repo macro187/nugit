@@ -95,9 +95,19 @@ namespace NuGit.Workspaces
         static string GenerateSh(string target)
         {
             target = target.Replace("\\", "/");
+
+            var mono = "";
+            switch (Environment.OSVersion.Platform)
+            {
+                case PlatformID.MacOSX:
+                case PlatformID.Unix:
+                    mono = "mono --debug ";
+                    break;
+            }
+
             return
                 "#!/bin/bash\n" +
-                "\"$(dirname $0)/" + target + "\" \"$@\"\n";
+                mono + "\"$(dirname $0)/" + target + "\" \"$@\"\n";
         }
 
     }
