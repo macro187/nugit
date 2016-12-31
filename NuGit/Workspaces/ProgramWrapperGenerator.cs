@@ -78,6 +78,17 @@ namespace NuGit.Workspaces
                     Trace.WriteLine(shPath);
                     File.WriteAllText(shPath, sh);
                     paths.Add(shPath);
+
+                    if (!IsOnWindows())
+                    {
+                        using (TraceExtensions.Step("Making " + shPath + " executable"))
+                        {
+                            if (ProcessExtensions.Invoke("bash", "-c", "chmod", "u+x", shPath) != 0)
+                            {
+                                throw new UserErrorException("Making " + shPath + " executable failed");
+                            }
+                        }
+                    }
                 }
             }
 
@@ -94,20 +105,24 @@ namespace NuGit.Workspaces
 
         static string GenerateSh(string target)
         {
+            var mono = IsOnWindows() ? "" : "mono --debug ";
             target = target.Replace("\\", "/");
+            return
+                "#!/bin/bash\n" +
+                mono + "\"$(dirname $0)/" + target + "\" \"$@\"\n";
+        }
 
-            var mono = "";
+
+        static bool IsOnWindows()
+        {
             switch (Environment.OSVersion.Platform)
             {
                 case PlatformID.MacOSX:
                 case PlatformID.Unix:
-                    mono = "mono --debug ";
-                    break;
+                    return false;
+                default:
+                    return true;
             }
-
-            return
-                "#!/bin/bash\n" +
-                mono + "\"$(dirname $0)/" + target + "\" \"$@\"\n";
         }
 
     }
