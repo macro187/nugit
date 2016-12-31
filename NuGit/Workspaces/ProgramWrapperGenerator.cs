@@ -83,7 +83,7 @@ namespace NuGit.Workspaces
                     {
                         using (TraceExtensions.Step("Making " + shPath + " executable"))
                         {
-                            if (ProcessExtensions.Invoke("bash", "-c", "chmod", "u+x", shPath) != 0)
+                            if (ProcessExtensions.Invoke("chmod", "u+x", shPath) != 0)
                             {
                                 throw new UserErrorException("Making " + shPath + " executable failed");
                             }
