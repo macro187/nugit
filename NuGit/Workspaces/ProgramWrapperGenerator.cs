@@ -81,13 +81,7 @@ namespace NuGit.Workspaces
 
                     if (!IsOnWindows())
                     {
-                        using (TraceExtensions.Step("Making " + shPath + " executable"))
-                        {
-                            if (ProcessExtensions.Invoke("chmod", "u+x", shPath) != 0)
-                            {
-                                throw new UserErrorException("Making " + shPath + " executable failed");
-                            }
-                        }
+                        Process.Start("chmod", "u+x \"" + shPath + "\"").WaitForExit();
                     }
                 }
             }
