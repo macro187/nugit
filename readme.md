@@ -109,6 +109,9 @@ all programs in all repositories and cleans up orphan scripts.
 Adding the `.bin` directory to your system path makes exported programs
 available throughout your system.
 
+On Windows, the *bash* scripts are suitable for use in *Git Bash*.  On Unix,
+the *bash* scripts run your .NET programs using `mono --debug`.
+
 
 Stealth Mode
 ------------
