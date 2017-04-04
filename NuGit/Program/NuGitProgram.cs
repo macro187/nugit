@@ -60,6 +60,8 @@ namespace NuGit
                         return Help(args);
                     case "RESTORE":
                         return Restore(args);
+                    case "UPDATE":
+                        return Update(args);
                     case "CLONE":
                         return Clone(args);
                     case "INSTALL":
@@ -163,6 +165,23 @@ namespace NuGit
             var repository = WhereAmI();
             if (repository == null) throw new UserErrorException("Not in a repository");
 
+            DependencyTraverser.Traverse(repository);
+
+            return 0;
+        }
+
+
+        /// <summary>
+        /// The <c>update</c> command
+        /// </summary>
+        ///
+        static int Update(Queue<string> args)
+        {
+            if (args.Any()) throw new UserErrorException("Too many arguments");
+            var repository = WhereAmI();
+            if (repository == null) throw new UserErrorException("Not in a repository");
+
+            repository.ClearDotNuGitLock();
             DependencyTraverser.Traverse(repository);
 
             return 0;

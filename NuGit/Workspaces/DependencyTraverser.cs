@@ -4,6 +4,7 @@ using System.Diagnostics;
 using NuGit.Infrastructure;
 using NuGit.Git;
 using MacroSystem;
+using System.Linq;
 
 namespace NuGit.Workspaces
 {
@@ -38,7 +39,7 @@ namespace NuGit.Workspaces
             using (TraceExtensions.Step("Calculating dependencies"))
             {
                 var names = new List<GitRepositoryName>();
-                Traverse(repository, name => names.Add(name));
+                Traverse(repository, url => names.Add(url.RepositoryName));
                 return names;
             }
         }
@@ -68,17 +69,48 @@ namespace NuGit.Workspaces
         /// will not
         /// </param>
         ///
-        public static void Traverse(Repository repository, Action<GitRepositoryName> onVisited)
+        public static void Traverse(Repository repository, Action<GitUrl> onVisited)
         {
             if (repository == null) throw new ArgumentNullException("repository");
+
+            IList<GitUrl> lockUrls;
+
+            lockUrls = repository.GetDotNuGitLock();
+            if (lockUrls.Count > 0)
+            {
+                TraverseLock(repository, lockUrls, onVisited);
+                return;
+            }
+
+            lockUrls = new List<GitUrl>();
+
             Traverse(
                 repository.Workspace,
                 repository.GetDotNuGit().Dependencies,
                 repository,
                 new Dictionary<GitRepositoryName, GitCommitName>() { { repository.Name, new GitCommitName("HEAD") } },
                 new HashSet<GitRepositoryName>() { repository.Name },
-                onVisited
+                url => { onVisited(url); lockUrls.Add(url); }
                 );
+
+            lockUrls = lockUrls
+                .Select(url =>
+                    new GitUrl(
+                        url.ToString() + "#" +
+                        GitRepository.GetRevision(repository.Workspace.FindRepository(url.RepositoryName).RootPath)))
+                .ToList();
+
+            repository.SetDotNuGitLock(lockUrls);
+        }
+
+
+        static void TraverseLock(Repository repository, IList<GitUrl> lockUrls, Action<GitUrl> onVisited)
+        {
+            foreach (var url in lockUrls)
+            {
+                CheckOut(repository.Workspace, url.RepositoryName, url.Commit);
+                onVisited(url);
+            }
         }
 
 
@@ -106,10 +138,10 @@ namespace NuGit.Workspaces
         /// will not
         /// </param>
         ///
-        public static void Traverse(
+        static void Traverse(
             Workspace workspace,
             IEnumerable<GitDependencyInfo> dependencies,
-            Action<GitRepositoryName> onVisited)
+            Action<GitUrl> onVisited)
         {
             Traverse(
                 workspace,
@@ -127,7 +159,7 @@ namespace NuGit.Workspaces
             Repository requiredBy,
             IDictionary<GitRepositoryName,GitCommitName> checkedOut,
             ISet<GitRepositoryName> visited,
-            Action<GitRepositoryName> onVisited
+            Action<GitUrl> onVisited
             )
         {
             if (workspace == null) throw new ArgumentNullException("workspace");
@@ -176,10 +208,7 @@ namespace NuGit.Workspaces
                     continue;
                 }
 
-                using (TraceExtensions.Step("Checking out " + name + " to " + commit))
-                {
-                    GitRepository.Checkout(workspace.FindRepository(name).RootPath, commit);
-                }
+                CheckOut(workspace, name, commit);
                 checkedOut.Add(name, commit);
             }
 
@@ -191,7 +220,7 @@ namespace NuGit.Workspaces
                 var name = d.Url.RepositoryName;
                 if (visited.Contains(name)) continue;
 
-                onVisited(name);
+                onVisited(new GitUrl(d.Url + "#" + d.Version));
             }
 
             //
@@ -212,6 +241,15 @@ namespace NuGit.Workspaces
                     checkedOut,
                     visited,
                     onVisited);
+            }
+        }
+
+
+        static void CheckOut(Workspace workspace, GitRepositoryName name, GitCommitName commit)
+        {
+            using (TraceExtensions.Step("Checking out " + name + " to " + commit))
+            {
+                GitRepository.Checkout(workspace.FindRepository(name).RootPath, commit);
             }
         }
 

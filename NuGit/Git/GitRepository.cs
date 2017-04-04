@@ -42,5 +42,27 @@ namespace NuGit.Git
                 throw new UserErrorException("git checkout failed");
         }
 
+
+        /// <summary>
+        /// Get the unique hash identifier of the currently-checked-out revision of a Git repository
+        /// </summary>
+        ///
+        public static string GetRevision(string repositoryPath)
+        {
+            if (repositoryPath == null)
+                throw new ArgumentNullException("repositoryPath");
+            if (!Directory.Exists(repositoryPath))
+                throw new ArgumentException("Repository path doesn't exist", "repositoryPath");
+
+            var result = ProcessExtensions.ExecuteCaptured(
+                false, false,
+                "git", "-C", repositoryPath, "rev-parse", "HEAD");
+            
+            if (result.ExitCode != 0)
+                throw new UserErrorException("git checkout failed");
+
+            return result.StandardOutput.Trim();
+        }
+
     }
 }

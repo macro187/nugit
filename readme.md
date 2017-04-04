@@ -145,7 +145,13 @@ Commands
     restore
         Clone and checkout the specified revisions of the Git repositories
         listed in the current repository's .nugit file, then do the same,
-        recursively, for each
+        recursively, for each, recording the sequence of repositories and
+        exact commits in the .nugit.lock file
+
+    update
+        Remove the .nugit.lock file and then restore as per the restore
+        command, with the effect of updating to the latest dependencies
+        specified in the .nugit file
 
     clone <url> [<version>]
         Clone a repository into the current workspace and restore its required

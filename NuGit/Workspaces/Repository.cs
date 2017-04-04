@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
 using NuGit.Infrastructure;
 using NuGit.Git;
+using System.Linq;
 
 namespace NuGit.Workspaces
 {
@@ -80,11 +82,7 @@ namespace NuGit.Workspaces
             Justification = "Emphasise that information is reread on each call")]
         public DotNuGit GetDotNuGit()
         {
-            string dotNuGitDir = Path.Combine(RootPath, ".nugit");
-
-            if (!Directory.Exists(dotNuGitDir))
-                dotNuGitDir = RootPath;
-            
+            string dotNuGitDir = GetDotNuGitDir();
             string path = Path.Combine(dotNuGitDir, ".nugit");
 
             if (!File.Exists(path))
@@ -99,6 +97,71 @@ namespace NuGit.Workspaces
                 e.Path = path;
                 throw;
             }
+        }
+
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design",
+            "CA1024:UsePropertiesWhereAppropriate",
+            Justification = "Reads from a file whose contents can change, so better as a method to imply action")]
+        public IList<GitUrl> GetDotNuGitLock()
+        {
+            string dotNuGitDir = GetDotNuGitDir();
+            string path = Path.Combine(dotNuGitDir, ".nugit.lock");
+            if (!File.Exists(path)) return new GitUrl[0];
+
+            var result = new List<GitUrl>();
+            int lineNumber = 0;
+            foreach (var rawline in File.ReadLines(path))
+            {
+                lineNumber++;
+                var line = rawline.Trim();
+                if (string.IsNullOrEmpty(line)) continue;
+                if (line.StartsWith("#", StringComparison.Ordinal)) continue;
+                GitUrl url;
+                try
+                {
+                    url = new GitUrl(line);
+                }
+                catch (FormatException fe)
+                {
+                    throw new FileParseException(
+                        "Invalid Git URL encountered",
+                        lineNumber,
+                        rawline,
+                        fe);
+                }
+                result.Add(url);
+            }
+
+            return result;
+        }
+
+
+        public void SetDotNuGitLock(IEnumerable<GitUrl> urls)
+        {
+            string dotNuGitDir = GetDotNuGitDir();
+            string path = Path.Combine(dotNuGitDir, ".nugit.lock");
+            File.WriteAllLines(
+                path,
+                urls.Select(url => string.Concat(url.ToString(), "#", url.Commit)));
+        }
+
+
+        public void ClearDotNuGitLock()
+        {
+            string dotNuGitDir = GetDotNuGitDir();
+            string path = Path.Combine(dotNuGitDir, ".nugit.lock");
+            if (!File.Exists(path)) return;
+            File.Delete(path);
+        }
+
+
+        string GetDotNuGitDir()
+        {
+            string dotNuGitDir = Path.Combine(RootPath, ".nugit");
+            if (Directory.Exists(dotNuGitDir)) return dotNuGitDir;
+            return RootPath;
         }
 
     }
