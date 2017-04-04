@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NuGit</RootNamespace>
     <AssemblyName>NuGit</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
@@ -53,6 +53,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -81,13 +82,11 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Infrastructure\ConsoleApplicationTraceListener.cs" />
     <Compile Include="Infrastructure\UserErrorException.cs" />
-    <Compile Include="Infrastructure\ProcessExtensions.cs" />
     <Compile Include="Program\NuGitProgram.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Workspaces\Repository.cs" />
     <Compile Include="Git\GitRepositoryName.cs" />
     <Compile Include="Workspaces\DependencyTraverser.cs" />
-    <Compile Include="Infrastructure\StringExtensions.cs" />
     <Compile Include="Workspaces\Workspace.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -114,6 +113,16 @@
     <EmbeddedResource Include="..\readme.md">
       <Link>readme.md</Link>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\macro-sharp\MacroDiagnostics\MacroDiagnostics.csproj">
+      <Project>{650a86c2-c971-48de-8df1-13970bc9d3c2}</Project>
+      <Name>MacroDiagnostics</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\macro-sharp\MacroSystem\MacroSystem.csproj">
+      <Project>{4b9b553a-b600-4dae-ac79-1d0cb0b35584}</Project>
+      <Name>MacroSystem</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

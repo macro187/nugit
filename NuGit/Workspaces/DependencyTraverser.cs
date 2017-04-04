@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using NuGit.Infrastructure;
 using NuGit.Git;
+using MacroSystem;
 
 namespace NuGit.Workspaces
 {

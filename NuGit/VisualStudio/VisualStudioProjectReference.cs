@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using NuGit.Infrastructure;
+using MacroSystem;
 
 namespace NuGit.VisualStudio
 {

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using MacroSystem;
 
 namespace NuGit.Infrastructure
 {

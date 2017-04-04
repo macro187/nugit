@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using NuGit.Infrastructure;
+using MacroDiagnostics;
 
 namespace NuGit.Git
 {
@@ -20,7 +21,7 @@ namespace NuGit.Git
                 throw new ArgumentException("Workspace path doesn't exist", "workspacePath");
             if (gitUrl == null) throw new ArgumentNullException("gitUrl");
 
-            if (ProcessExtensions.Invoke("git", "-C", workspacePath, "clone", gitUrl) != 0)
+            if (ProcessExtensions.Execute(true, true, "git", "-C", workspacePath, "clone", gitUrl) != 0)
                 throw new UserErrorException("git clone failed");
         }
 
@@ -37,7 +38,7 @@ namespace NuGit.Git
                 throw new ArgumentException("Repository path doesn't exist", "repositoryPath");
 
             // TODO If uncommitted changes, error
-            if (ProcessExtensions.Invoke("git", "-C", repositoryPath, "checkout", commit) != 0)
+            if (ProcessExtensions.Execute(true, true, "git", "-C", repositoryPath, "checkout", commit) != 0)
                 throw new UserErrorException("git checkout failed");
         }
 
