@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using NuGit.Git;
+using MacroGit;
 using NuGit.Infrastructure;
 using NuGit.VisualStudio;
 

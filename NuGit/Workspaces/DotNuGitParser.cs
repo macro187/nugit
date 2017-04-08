@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using NuGit.Git;
+using MacroGit;
 using NuGit.Infrastructure;
 
 namespace NuGit.Workspaces
@@ -25,7 +25,7 @@ namespace NuGit.Workspaces
         {
             if (lines == null) throw new ArgumentNullException("lines");
 
-            var dependencies = new List<GitDependencyInfo>();
+            var dependencies = new List<Dependency>();
             var programs = new List<string>();
 
             int lineNumber = 0;
@@ -61,23 +61,23 @@ namespace NuGit.Workspaces
                 }
 
                 //
-                // <giturl>
+                // <dependencyurl>
                 //
-                GitUrl url;
+                DependencyUrl url;
                 try
                 {
-                    url = new GitUrl(line.Trim());
+                    url = new DependencyUrl(line.Trim());
                 }
                 catch (FormatException fe)
                 {
                     throw new FileParseException(
-                        "Invalid Git repository URL: " + fe.Message,
+                        "Invalid dependency URL: " + fe.Message,
                         lineNumber + 1,
                         line,
                         fe);
                 }
 
-                dependencies.Add(new GitDependencyInfo(url, url.Commit ?? new GitCommitName("master")));
+                dependencies.Add(url.Dependency);
             }
 
             return new DotNuGit(dependencies, programs);

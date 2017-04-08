@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using MacroGit;
 using NuGit.Infrastructure;
-using NuGit.Git;
 using System.Linq;
 
 namespace NuGit.Workspaces
@@ -104,13 +104,13 @@ namespace NuGit.Workspaces
             "Microsoft.Design",
             "CA1024:UsePropertiesWhereAppropriate",
             Justification = "Reads from a file whose contents can change, so better as a method to imply action")]
-        public IList<GitUrl> GetDotNuGitLock()
+        public IList<Dependency> GetDotNuGitLock()
         {
             string dotNuGitDir = GetDotNuGitDir();
             string path = Path.Combine(dotNuGitDir, ".nugit.lock");
-            if (!File.Exists(path)) return new GitUrl[0];
+            if (!File.Exists(path)) return new Dependency[0];
 
-            var result = new List<GitUrl>();
+            var result = new List<Dependency>();
             int lineNumber = 0;
             foreach (var rawline in File.ReadLines(path))
             {
@@ -118,33 +118,33 @@ namespace NuGit.Workspaces
                 var line = rawline.Trim();
                 if (string.IsNullOrEmpty(line)) continue;
                 if (line.StartsWith("#", StringComparison.Ordinal)) continue;
-                GitUrl url;
+                DependencyUrl url;
                 try
                 {
-                    url = new GitUrl(line);
+                    url = new DependencyUrl(line);
                 }
                 catch (FormatException fe)
                 {
                     throw new FileParseException(
-                        "Invalid Git URL encountered",
+                        "Invalid dependency URL encountered",
                         lineNumber,
                         rawline,
                         fe);
                 }
-                result.Add(url);
+                result.Add(url.Dependency);
             }
 
             return result;
         }
 
 
-        public void SetDotNuGitLock(IEnumerable<GitUrl> urls)
+        public void SetDotNuGitLock(IEnumerable<Dependency> dependencies)
         {
             string dotNuGitDir = GetDotNuGitDir();
             string path = Path.Combine(dotNuGitDir, ".nugit.lock");
             File.WriteAllLines(
                 path,
-                urls.Select(url => string.Concat(url.ToString(), "#", url.Commit)));
+                dependencies.Select(d => new DependencyUrl(d).ToString()));
         }
 
 

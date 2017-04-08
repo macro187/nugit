@@ -4,8 +4,8 @@ using System.Linq;
 using System;
 using System.IO;
 using System.Reflection;
+using MacroGit;
 using NuGit.Infrastructure;
-using NuGit.Git;
 using NuGit.Workspaces;
 
 namespace NuGit
@@ -205,7 +205,7 @@ namespace NuGit
                     ? repository.Workspace
                     : new Workspace(Environment.CurrentDirectory);
 
-            DependencyTraverser.Traverse(workspace, new GitDependencyInfo[] { new GitDependencyInfo(url, version) });
+            DependencyTraverser.Traverse(workspace, new Dependency[] { new Dependency(url, version) });
 
             return 0;
         }
