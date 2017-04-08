@@ -148,6 +148,11 @@ Commands
         recursively, for each, recording the sequence of repositories and
         exact commits in the .nugit.lock file
 
+        - OR -
+
+        If .nugit.lock is already present, clone and checkout the specified
+        revisions of the Git repositories listed in the .nugit.lock file
+
     update
         Remove the .nugit.lock file and then restore as per the restore
         command, with the effect of updating to the latest dependencies
