@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using IOPath = System.IO.Path;
 using System.Collections.Generic;
 using System.Linq;
 using MacroGuards;
@@ -10,39 +11,21 @@ namespace NuGit.Workspaces
 {
 
     /// <summary>
-    /// A repository subdirectory
+    /// A NuGit repository
     /// </summary>
     ///
     public class Repository
+        : GitRepository
     {
 
-        /// <summary>
-        /// Determine whether a directory is a Git repository
-        /// </summary>
-        ///
-        public static bool IsRepository(string directoryPath)
-        {
-            return Directory.Exists(Path.Combine(directoryPath, ".git"));
-        }
-
-
         internal Repository(Workspace workspace, GitRepositoryName name)
+            : base(
+                IOPath.Combine(
+                    Guard.NotNull(workspace, nameof(workspace)).RootPath,
+                    Guard.NotNull(name, nameof(name))))
         {
-            if (workspace == null) throw new ArgumentNullException("workspace");
-            if (name == null) throw new ArgumentNullException("name");
-            RootPath = Path.Combine(workspace.RootPath, name);
-            Name = name;
             Workspace = workspace;
-        }
-
-
-        /// <summary>
-        /// Full path to the repository's root directory
-        /// </summary>
-        ///
-        public string RootPath
-        {
-            get;
+            Name = name;
         }
 
 
@@ -73,7 +56,7 @@ namespace NuGit.Workspaces
         public DotNuGit ReadDotNuGit()
         {
             string dotNuGitDir = GetDotNuGitDir();
-            string path = Path.Combine(dotNuGitDir, ".nugit");
+            string path = IOPath.Combine(dotNuGitDir, ".nugit");
 
             if (!File.Exists(path))
                 return new DotNuGit();
@@ -94,34 +77,72 @@ namespace NuGit.Workspaces
         /// Read dependency information from .nugit.lock
         /// </summary>
         ///
-        public IList<Dependency> ReadNuGitLock()
+        public IList<LockDependency> ReadNuGitLock()
         {
             string dotNuGitDir = GetDotNuGitDir();
-            string path = Path.Combine(dotNuGitDir, ".nugit.lock");
-            if (!File.Exists(path)) return new Dependency[0];
+            string path = IOPath.Combine(dotNuGitDir, ".nugit.lock");
+            if (!File.Exists(path)) return new LockDependency[0];
 
-            var result = new List<Dependency>();
+            var result = new List<LockDependency>();
             int lineNumber = 0;
             foreach (var rawline in File.ReadLines(path))
             {
                 lineNumber++;
                 var line = rawline.Trim();
+
                 if (string.IsNullOrEmpty(line)) continue;
                 if (line.StartsWith("#", StringComparison.Ordinal)) continue;
-                DependencyUrl url;
+
+                var a = line.Split(' ');
+                if (a.Length != 3)
+                    throw new FileParseException(
+                        "Expected URL, commit name, and commit ID",
+                        lineNumber,
+                        rawline);
+                
+                GitUrl url;
                 try
                 {
-                    url = new DependencyUrl(line);
+                    url = new GitUrl(a[0]);
                 }
                 catch (FormatException fe)
                 {
                     throw new FileParseException(
-                        "Invalid dependency URL encountered",
+                        "Expected valid Git URL",
                         lineNumber,
                         rawline,
                         fe);
                 }
-                result.Add(url.Dependency);
+
+                GitCommitName commitName;
+                try
+                {
+                    commitName = new GitCommitName(a[1]);
+                }
+                catch (FormatException fe)
+                {
+                    throw new FileParseException(
+                        "Expected valid Git commit name",
+                        lineNumber,
+                        rawline,
+                        fe);
+                }
+                
+                GitCommitName commitId;
+                try
+                {
+                    commitId = new GitCommitName(a[2]);
+                }
+                catch (FormatException fe)
+                {
+                    throw new FileParseException(
+                        "Expected valid Git commit identifier",
+                        lineNumber,
+                        rawline,
+                        fe);
+                }
+
+                result.Add(new LockDependency(url, commitName, commitId));
             }
 
             return result;
@@ -132,12 +153,12 @@ namespace NuGit.Workspaces
         /// Write dependency information to .nugit.lock
         /// </summary>
         ///
-        public void WriteNuGitLock(ICollection<Dependency> dependencies)
+        public void WriteNuGitLock(ICollection<LockDependency> dependencies)
         {
             Guard.NotNull(dependencies, nameof(dependencies));
 
             string dotNuGitDir = GetDotNuGitDir();
-            string path = Path.Combine(dotNuGitDir, ".nugit.lock");
+            string path = IOPath.Combine(dotNuGitDir, ".nugit.lock");
 
             if (dependencies.Count == 0)
             {
@@ -147,7 +168,13 @@ namespace NuGit.Workspaces
 
             File.WriteAllLines(
                 path,
-                dependencies.Select(d => new DependencyUrl(d).ToString()));
+                dependencies.Select(d =>
+                    string.Concat(
+                        d.Url,
+                        " ",
+                        d.CommitName,
+                        " ",
+                        d.CommitId)));
         }
 
 
@@ -158,7 +185,7 @@ namespace NuGit.Workspaces
         public void DeleteNuGitLock()
         {
             string dotNuGitDir = GetDotNuGitDir();
-            string path = Path.Combine(dotNuGitDir, ".nugit.lock");
+            string path = IOPath.Combine(dotNuGitDir, ".nugit.lock");
             if (!File.Exists(path)) return;
             File.Delete(path);
         }
@@ -170,9 +197,9 @@ namespace NuGit.Workspaces
         ///
         string GetDotNuGitDir()
         {
-            string dotNuGitDir = Path.Combine(RootPath, ".nugit");
+            string dotNuGitDir = IOPath.Combine(Path, ".nugit");
             if (Directory.Exists(dotNuGitDir)) return dotNuGitDir;
-            return RootPath;
+            return Path;
         }
 
     }

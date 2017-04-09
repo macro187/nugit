@@ -60,6 +60,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Workspaces\LockDependency.cs" />
     <Compile Include="Workspaces\DependencyUrl.cs" />
     <Compile Include="Infrastructure\CollectionExtensions.cs" />
     <Compile Include="Infrastructure\ReadmeParser.cs" />

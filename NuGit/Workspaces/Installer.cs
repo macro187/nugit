@@ -37,7 +37,7 @@ namespace NuGit.Workspaces
         {
             if (repository == null) throw new ArgumentNullException("repository");
 
-            var sln = VisualStudioSolution.Find(repository.RootPath);
+            var sln = VisualStudioSolution.Find(repository.Path);
             if (sln == null) throw new UserErrorException("No .sln file in repo");
 
             DeleteNugitSolutionFolders(sln);
@@ -53,7 +53,7 @@ namespace NuGit.Workspaces
 
         static void Install(Repository repository, VisualStudioSolution sln, GitRepositoryName dependencyName)
         {
-            var slnLocalPath = GetLocalPath(repository.RootPath, Path.GetDirectoryName(sln.Path));
+            var slnLocalPath = GetLocalPath(repository.Path, Path.GetDirectoryName(sln.Path));
             var slnLocalPathComponents = SplitPath(slnLocalPath);
             var slnToWorkspacePath = Path.Combine(Enumerable.Repeat("..", slnLocalPathComponents.Length + 1).ToArray());
 
@@ -61,7 +61,7 @@ namespace NuGit.Workspaces
             {
                 var dependencyRepository = repository.Workspace.GetRepository(dependencyName);
 
-                var dependencySln = VisualStudioSolution.Find(dependencyRepository.RootPath);
+                var dependencySln = VisualStudioSolution.Find(dependencyRepository.Path);
                 if (dependencySln == null)
                 {
                     Trace.TraceInformation("No .sln found");
@@ -70,7 +70,7 @@ namespace NuGit.Workspaces
                 Trace.TraceInformation("Found " + Path.GetFileName(dependencySln.Path));
 
                 var dependencySlnLocalPath =
-                    GetLocalPath(dependencyRepository.RootPath, Path.GetDirectoryName(dependencySln.Path));
+                    GetLocalPath(dependencyRepository.Path, Path.GetDirectoryName(dependencySln.Path));
 
                 var dependencyProjects =
                     dependencySln.ProjectReferences
