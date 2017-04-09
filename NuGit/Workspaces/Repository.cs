@@ -1,9 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
+using MacroGuards;
 using MacroGit;
 using NuGit.Infrastructure;
-using System.Linq;
 
 namespace NuGit.Workspaces
 {
@@ -42,7 +43,6 @@ namespace NuGit.Workspaces
         public string RootPath
         {
             get;
-            private set;
         }
 
 
@@ -53,7 +53,6 @@ namespace NuGit.Workspaces
         public Workspace Workspace
         {
             get;
-            private set;
         }
 
 
@@ -64,23 +63,14 @@ namespace NuGit.Workspaces
         public GitRepositoryName Name
         {
             get;
-            private set;
         }
 
 
         /// <summary>
-        /// Get the repository's .nugit information
+        /// Read .nugit information
         /// </summary>
         ///
-        /// <remarks>
-        /// Result can be affected by <see cref="Checkout()"/>.
-        /// </remarks>
-        ///
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design",
-            "CA1024:UsePropertiesWhereAppropriate",
-            Justification = "Emphasise that information is reread on each call")]
-        public DotNuGit GetDotNuGit()
+        public DotNuGit ReadDotNuGit()
         {
             string dotNuGitDir = GetDotNuGitDir();
             string path = Path.Combine(dotNuGitDir, ".nugit");
@@ -100,11 +90,11 @@ namespace NuGit.Workspaces
         }
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design",
-            "CA1024:UsePropertiesWhereAppropriate",
-            Justification = "Reads from a file whose contents can change, so better as a method to imply action")]
-        public IList<Dependency> GetDotNuGitLock()
+        /// <summary>
+        /// Read dependency information from .nugit.lock
+        /// </summary>
+        ///
+        public IList<Dependency> ReadNuGitLock()
         {
             string dotNuGitDir = GetDotNuGitDir();
             string path = Path.Combine(dotNuGitDir, ".nugit.lock");
@@ -138,17 +128,34 @@ namespace NuGit.Workspaces
         }
 
 
-        public void SetDotNuGitLock(IEnumerable<Dependency> dependencies)
+        /// <summary>
+        /// Write dependency information to .nugit.lock
+        /// </summary>
+        ///
+        public void WriteNuGitLock(ICollection<Dependency> dependencies)
         {
+            Guard.NotNull(dependencies, nameof(dependencies));
+
             string dotNuGitDir = GetDotNuGitDir();
             string path = Path.Combine(dotNuGitDir, ".nugit.lock");
+
+            if (dependencies.Count == 0)
+            {
+                File.Delete(path);
+                return;
+            }
+
             File.WriteAllLines(
                 path,
                 dependencies.Select(d => new DependencyUrl(d).ToString()));
         }
 
 
-        public void ClearDotNuGitLock()
+        /// <summary>
+        /// Delete .nugit.lock
+        /// </summary>
+        ///
+        public void DeleteNuGitLock()
         {
             string dotNuGitDir = GetDotNuGitDir();
             string path = Path.Combine(dotNuGitDir, ".nugit.lock");
@@ -157,6 +164,10 @@ namespace NuGit.Workspaces
         }
 
 
+        /// <summary>
+        /// Determine full path to directory that does (or should) contain the .nugit file
+        /// </summary>
+        ///
         string GetDotNuGitDir()
         {
             string dotNuGitDir = Path.Combine(RootPath, ".nugit");

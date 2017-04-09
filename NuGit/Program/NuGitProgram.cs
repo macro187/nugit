@@ -181,7 +181,7 @@ namespace NuGit
             var repository = WhereAmI();
             if (repository == null) throw new UserErrorException("Not in a repository");
 
-            repository.ClearDotNuGitLock();
+            repository.DeleteNuGitLock();
             DependencyTraverser.Traverse(repository);
 
             return 0;

@@ -55,7 +55,7 @@ namespace NuGit.Workspaces
 
             var paths = new List<string>();
 
-            var dotNuGit = repository.GetDotNuGit();
+            var dotNuGit = repository.ReadDotNuGit();
             if (dotNuGit.Programs.Count == 0) return paths;
 
             using (TraceExtensions.Step("Writing program wrapper script(s) for " + repository.Name))

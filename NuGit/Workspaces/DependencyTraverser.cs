@@ -75,7 +75,7 @@ namespace NuGit.Workspaces
 
             IList<Dependency> lockDependencies;
 
-            lockDependencies = repository.GetDotNuGitLock();
+            lockDependencies = repository.ReadNuGitLock();
             if (lockDependencies.Count > 0)
             {
                 TraverseLock(repository, lockDependencies, onVisited);
@@ -86,7 +86,7 @@ namespace NuGit.Workspaces
 
             Traverse(
                 repository.Workspace,
-                repository.GetDotNuGit().Dependencies,
+                repository.ReadDotNuGit().Dependencies,
                 repository,
                 new Dictionary<GitRepositoryName, GitCommitName>() { { repository.Name, new GitCommitName("HEAD") } },
                 new HashSet<GitRepositoryName>() { repository.Name },
@@ -101,7 +101,7 @@ namespace NuGit.Workspaces
                             .GetCommitId()))
                 .ToList();
 
-            repository.SetDotNuGitLock(lockDependencies);
+            repository.WriteNuGitLock(lockDependencies);
         }
 
 
@@ -237,7 +237,7 @@ namespace NuGit.Workspaces
 
                 Traverse(
                     workspace,
-                    repo.GetDotNuGit().Dependencies,
+                    repo.ReadDotNuGit().Dependencies,
                     repo,
                     checkedOut,
                     visited,
@@ -250,7 +250,6 @@ namespace NuGit.Workspaces
         {
             using (TraceExtensions.Step("Checking out " + name + " to " + commit))
             {
-                Debug.Print("Checking out {0} to {1}", name, commit);
                 new GitRepository(workspace.FindRepository(name).RootPath).Checkout(commit);
             }
         }
