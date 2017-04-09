@@ -142,21 +142,20 @@ Commands
     help
         Display command line usage information
 
-    restore
-        Clone and checkout the specified revisions of the Git repositories
-        listed in the current repository's .nugit file, then do the same,
-        recursively, for each, recording the sequence of repositories and
-        exact commits in the .nugit.lock file
-
-        - OR -
-
-        If .nugit.lock is already present, clone and checkout the specified
-        revisions of the Git repositories listed in the .nugit.lock file
-
     update
-        Remove the .nugit.lock file and then restore as per the restore
-        command, with the effect of updating to the latest dependencies
-        specified in the .nugit file
+        Restore dependencies listed in .nugit
+
+        Recursively clone and/or checkout repositories and commits listed
+        in .nugit, recording the exact sequence and commit identifiers in
+        .nugit.lock
+
+    restore
+        Restore dependencies listed in .nugit.lock or .nugit
+
+        If .nugit.lock is present, clone and/or checkout the exact repositories
+        and commits recorded in it
+
+        If .nugit.lock is not present, same as the update command
 
     clone <url> [<version>]
         Clone a repository into the current workspace and restore its required
