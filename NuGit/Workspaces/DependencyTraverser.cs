@@ -114,7 +114,6 @@ namespace NuGit.Workspaces
                 var r = workspace.FindRepository(name);
                 if (r == null)
                 {
-                    // TODO factor to shared method
                     Clone(workspace.RootPath, d.Url);
                     r = workspace.GetRepository(name);
                 }
