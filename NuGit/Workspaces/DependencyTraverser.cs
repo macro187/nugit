@@ -136,7 +136,7 @@ namespace NuGit.Workspaces
         ///
         public static void Traverse(Workspace workspace, IEnumerable<Dependency> dependencies)
         {
-            Traverse(workspace, dependencies, (name,repository) => {});
+            Traverse(workspace, dependencies, (d,r) => {});
         }
 
 
