@@ -4,7 +4,7 @@ using System.IO;
 using MacroGit;
 using nugit.Infrastructure;
 
-namespace nugit.Workspaces
+namespace nugit
 {
 
     /// <summary>

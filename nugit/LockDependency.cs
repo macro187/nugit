@@ -1,7 +1,7 @@
 ﻿using MacroGuards;
 using MacroGit;
 
-namespace nugit.Workspaces
+namespace nugit
 {
 
     /// <summary>

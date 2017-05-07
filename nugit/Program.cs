@@ -6,12 +6,11 @@ using System.IO;
 using System.Reflection;
 using MacroGit;
 using nugit.Infrastructure;
-using nugit.Workspaces;
 
 namespace nugit
 {
 
-    static class NugitProgram
+    static class Program
     {
 
         static int Main(string[] argArray)

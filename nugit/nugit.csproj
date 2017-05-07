@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -60,32 +60,32 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Workspaces\LockDependency.cs" />
-    <Compile Include="Workspaces\DependencyUrl.cs" />
+    <Compile Include="LockDependency.cs" />
+    <Compile Include="DependencyUrl.cs" />
     <Compile Include="Infrastructure\CollectionExtensions.cs" />
     <Compile Include="Infrastructure\ReadmeParser.cs" />
     <Compile Include="Infrastructure\StreamReaderExtensions.cs" />
     <Compile Include="Infrastructure\TraceExtensions.cs" />
-    <Compile Include="Workspaces\Dependency.cs" />
+    <Compile Include="Dependency.cs" />
     <Compile Include="VisualStudio\VisualStudioProjectConfiguration.cs" />
     <Compile Include="VisualStudio\VisualStudioNestedProject.cs" />
     <Compile Include="VisualStudio\VisualStudioProjectReference.cs" />
     <Compile Include="VisualStudio\VisualStudioProject.cs" />
     <Compile Include="VisualStudio\VisualStudioProjectTypeIds.cs" />
     <Compile Include="VisualStudio\VisualStudioSolution.cs" />
-    <Compile Include="Workspaces\ProgramWrapperGenerator.cs" />
-    <Compile Include="Workspaces\Installer.cs" />
-    <Compile Include="Workspaces\DotNuGit.cs" />
+    <Compile Include="ProgramWrapperGenerator.cs" />
+    <Compile Include="Installer.cs" />
+    <Compile Include="DotNuGit.cs" />
     <Compile Include="Infrastructure\FileParseException.cs" />
-    <Compile Include="Workspaces\DotNuGitParser.cs" />
+    <Compile Include="DotNuGitParser.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Infrastructure\ConsoleApplicationTraceListener.cs" />
     <Compile Include="Infrastructure\UserErrorException.cs" />
-    <Compile Include="Program\NuGitProgram.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Workspaces\Repository.cs" />
-    <Compile Include="Workspaces\DependencyTraverser.cs" />
-    <Compile Include="Workspaces\Workspace.cs" />
+    <Compile Include="Repository.cs" />
+    <Compile Include="DependencyTraverser.cs" />
+    <Compile Include="Workspace.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="CodeAnalysisDictionary.xml" />

@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using nugit.Infrastructure;
 
-namespace nugit.Workspaces
+namespace nugit
 {
 
     /// <summary>
