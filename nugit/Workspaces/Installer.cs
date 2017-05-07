@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 using MacroGit;
 using nugit.Infrastructure;
 using nugit.VisualStudio;
@@ -17,16 +18,6 @@ namespace nugit.Workspaces
     {
 
         const string NugitFolderPrefix = "nugit-";
-
-
-        /// <summary>
-        /// Types of projects to avoid installing as dependencies
-        /// </summary>
-        ///
-        static readonly string[] DependencyTypeBlackList = {
-            VisualStudioProjectTypeIds.SolutionFolder,
-            VisualStudioProjectTypeIds.Test,
-        };
 
 
         /// <summary>
@@ -72,16 +63,7 @@ namespace nugit.Workspaces
                 var dependencySlnLocalPath =
                     GetLocalPath(dependencyRepository.Path, Path.GetDirectoryName(dependencySln.Path));
 
-                var dependencyProjects =
-                    dependencySln.ProjectReferences
-                        .Where(p => !string.IsNullOrWhiteSpace(p.TypeId))
-                        .Where(p => !DependencyTypeBlackList.Contains(p.TypeId))
-                        .Where(p => !string.IsNullOrWhiteSpace(p.Location))
-                        .Where(p => !Path.IsPathRooted(p.Location))
-                        .Where(p => !p.Location.StartsWith("..", StringComparison.Ordinal))
-                        .Where(p => !p.GetProject().ProjectTypeGuids.Intersect(DependencyTypeBlackList).Any())
-                        .OrderBy(p => p.Name)
-                        .ToList();
+                var dependencyProjects = FindDependencyProjects(dependencySln);
                 if (dependencyProjects.Count == 0)
                 {
                     Trace.TraceInformation("No projects found in solution");
@@ -124,6 +106,22 @@ namespace nugit.Workspaces
                     }
                 }
             }
+        }
+
+
+        static List<VisualStudioProjectReference> FindDependencyProjects(VisualStudioSolution sln)
+        {
+            return sln.ProjectReferences
+                .Where(p => !p.Name.EndsWith(".Tests", StringComparison.OrdinalIgnoreCase))
+                .Where(p => !(p.Name.IndexOf(".Tests.", StringComparison.OrdinalIgnoreCase) > -1))
+                .Where(p => !string.IsNullOrWhiteSpace(p.TypeId))
+                .Where(p => !(p.TypeId == VisualStudioProjectTypeIds.SolutionFolder))
+                .Where(p => !string.IsNullOrWhiteSpace(p.Location))
+                .Where(p => !Path.IsPathRooted(p.Location))
+                .Where(p => !p.Location.StartsWith("..", StringComparison.Ordinal))
+                .Where(p => !p.GetProject().ProjectTypeGuids.Contains(VisualStudioProjectTypeIds.Test))
+                .OrderBy(p => p.Name)
+                .ToList();
         }
 
 
