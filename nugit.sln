@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		readme.md = readme.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGit", "NuGit\NuGit.csproj", "{DFD84E86-A829-4293-8077-A45F1A580C1C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nugit", "nugit\nugit.csproj", "{DFD84E86-A829-4293-8077-A45F1A580C1C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nugit-macro-sharp", "nugit-macro-sharp", "{D0ED8DBA-3B07-4DEC-83B6-CDFD3CEEB156}"
 EndProject
@@ -28,7 +28,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nugit-macro-sharp-git", "nu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacroGit", "..\macro-sharp-git\MacroGit\MacroGit.csproj", "{2852B710-2752-4F72-963C-46D92F6C5C2E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGit.Tests", "NuGit.Tests\NuGit.Tests.csproj", "{0CFADF08-341E-4612-B3B3-42F6ED2ADCAC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nugit.Tests", "nugit.Tests\nugit.Tests.csproj", "{0CFADF08-341E-4612-B3B3-42F6ED2ADCAC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

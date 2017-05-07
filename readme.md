@@ -1,17 +1,17 @@
-NuGit
+nugit
 =====
 
-A Git-based dependency manager.
+A Git-based dependency manager
 
 
 Description
 ===========
 
-The core functionality works with any Git repository, but NuGit also includes
+The core functionality works with any Git repository, but nugit also includes
 .NET-specific functionality making it suitable for use as a simplified
 replacement for NuGet, hence the play on its name.
 
-NuGit is controlled by plain-text `.nugit` files located in the root
+nugit is controlled by plain-text `.nugit` files located in the root
 directories of Git repositories.
 
 
@@ -27,7 +27,7 @@ Features
 Dependency Management
 ---------------------
 
-NuGit makes it easy to use other Git repositories from your own.
+nugit makes it easy to use other Git repositories from your own.
 
 Specify URLs of other Git repositories you require in your own `.nugit` file:
 
@@ -37,7 +37,7 @@ Specify URLs of other Git repositories you require in your own `.nugit` file:
     https://example.com/repob.git#v2
     ...
 
-Based on that information, the NuGit `restore` command makes all required
+Based on that information, the nugit `restore` command makes all required
 repositories available as peers to your own, at the required revisions,
 including transitive dependencies:
 
@@ -57,22 +57,22 @@ including transitive dependencies:
 Visual Studio Projects
 ----------------------
 
-NuGit makes it easy to use .NET projects from other Git repositories.
+nugit makes it easy to use .NET projects from other Git repositories.
 
-The NuGit `install` command maintains solution folders in your Visual Studio
+The nugit `install` command maintains solution folders in your Visual Studio
 solution containing projects from all required repositories.  Add project
 references to them as needed.
 
 Whenever you add or remove dependencies, update the solution folders by
 re-running the `install` command.
 
-NuGit does not include unnecessary projects such as unit test suites.
+nugit does not include unnecessary projects such as unit test suites.
 
 
 Exported Programs
 -----------------
 
-NuGit makes it easy to use programs from your repositories.
+nugit makes it easy to use programs from your repositories.
 
 Specify paths to exportable programs in your `.nugit` file:
 
@@ -81,7 +81,7 @@ Specify paths to exportable programs in your `.nugit` file:
     ...
     program: MyProgram/bin/Debug/MyProgram.exe
 
-Based on that information, the NuGit `programs` command maintains a `.bin`
+Based on that information, the nugit `programs` command maintains a `.bin`
 directory containing executable wrapper scripts that run your programs
 in-place.  Scripts for both Windows *cmd.exe* and Unix *bash* are maintained:
 
@@ -103,7 +103,7 @@ in-place.  Scripts for both Windows *cmd.exe* and Unix *bash* are maintained:
 
     @"%~dp0..\myrepo\MyProgram\bin\Debug\MyProgram.exe" %*
 
-Running the NuGit `programs` command from your workspace builds scripts for
+Running the nugit `programs` command from your workspace builds scripts for
 all programs in all repositories and cleans up orphan scripts.
 
 Adding the `.bin` directory to your system path makes exported programs
@@ -116,21 +116,21 @@ the *bash* scripts run your .NET programs using `mono --debug`.
 Stealth Mode
 ------------
 
-NuGit can be used without affecting how your existing repository works.
+nugit can be used without affecting how your existing repository works.
 
 If you put your `.nugit` file inside a `.nugit/` subdirectory along with a
-NuGit-specific Visual Studio solution and project(s), NuGit uses them instead.
-Your NuGit-specific solution and projects can use NuGit-style dependencies
+nugit-specific Visual Studio solution and project(s), NuGit uses them instead.
+Your nugit-specific solution and projects can use NuGit-style dependencies
 (and be used as such) and the rest of your repository remains unchanged.
 
 
 Synopsis
 ========
 
-    NuGit.exe <command> [<args>]
+    nugit.exe <command> [<args>]
 
         <command>
-            The NuGit command to execute
+            The nugit command to execute
 
         <args>
             Command-specific options and arguments
