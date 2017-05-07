@@ -72,10 +72,12 @@ namespace nugit.Workspaces
                     var sh = GenerateSh(target);
 
                     Trace.WriteLine(cmdPath);
+                    if (File.Exists(cmdPath)) File.Move(cmdPath, cmdPath); // In case only the casing has changed
                     File.WriteAllText(cmdPath, cmd);
                     paths.Add(cmdPath);
 
                     Trace.WriteLine(shPath);
+                    if (File.Exists(shPath)) File.Move(shPath, shPath); // In case only the casing has changed
                     File.WriteAllText(shPath, sh);
                     paths.Add(shPath);
 
