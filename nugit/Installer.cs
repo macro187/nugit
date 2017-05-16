@@ -3,9 +3,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using MacroExceptions;
 using MacroGit;
+using MacroSln;
 using nugit.Infrastructure;
-using nugit.VisualStudio;
 
 namespace nugit
 {
@@ -29,7 +30,7 @@ namespace nugit
             if (repository == null) throw new ArgumentNullException("repository");
 
             var sln = VisualStudioSolution.Find(repository.Path);
-            if (sln == null) throw new UserErrorException("No .sln file in repo");
+            if (sln == null) throw new UserException("No .sln file in repo");
 
             DeleteNugitSolutionFolders(sln);
 

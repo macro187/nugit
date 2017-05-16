@@ -62,25 +62,16 @@
   <ItemGroup>
     <Compile Include="LockDependency.cs" />
     <Compile Include="DependencyUrl.cs" />
-    <Compile Include="Infrastructure\CollectionExtensions.cs" />
     <Compile Include="Infrastructure\ReadmeParser.cs" />
     <Compile Include="Infrastructure\StreamReaderExtensions.cs" />
     <Compile Include="Infrastructure\TraceExtensions.cs" />
     <Compile Include="Dependency.cs" />
-    <Compile Include="VisualStudio\VisualStudioProjectConfiguration.cs" />
-    <Compile Include="VisualStudio\VisualStudioNestedProject.cs" />
-    <Compile Include="VisualStudio\VisualStudioProjectReference.cs" />
-    <Compile Include="VisualStudio\VisualStudioProject.cs" />
-    <Compile Include="VisualStudio\VisualStudioProjectTypeIds.cs" />
-    <Compile Include="VisualStudio\VisualStudioSolution.cs" />
     <Compile Include="ProgramWrapperGenerator.cs" />
     <Compile Include="Installer.cs" />
     <Compile Include="DotNuGit.cs" />
-    <Compile Include="Infrastructure\FileParseException.cs" />
     <Compile Include="DotNuGitParser.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Infrastructure\ConsoleApplicationTraceListener.cs" />
-    <Compile Include="Infrastructure\UserErrorException.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository.cs" />
@@ -117,9 +108,21 @@
       <Project>{2852b710-2752-4f72-963c-46d92f6c5c2e}</Project>
       <Name>MacroGit</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\macro-sharp-sln\MacroSln\MacroSln.csproj">
+      <Project>{db791e76-82a9-449a-8e3d-aa433a664ad8}</Project>
+      <Name>MacroSln</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\macro-sharp\MacroCollections\MacroCollections.csproj">
+      <Project>{59ab63bf-eb32-48b3-917c-37e1aed9b999}</Project>
+      <Name>MacroCollections</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\macro-sharp\MacroDiagnostics\MacroDiagnostics.csproj">
       <Project>{650a86c2-c971-48de-8df1-13970bc9d3c2}</Project>
       <Name>MacroDiagnostics</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\macro-sharp\MacroExceptions\MacroExceptions.csproj">
+      <Project>{25b573fb-1fb2-4bae-a118-b633d31cf991}</Project>
+      <Name>MacroExceptions</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\macro-sharp\MacroGuards\MacroGuards.csproj">
       <Project>{0049d988-2426-45b0-8fda-eab78622d887}</Project>

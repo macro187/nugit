@@ -4,8 +4,8 @@ using IOPath = System.IO.Path;
 using System.Collections.Generic;
 using System.Linq;
 using MacroGuards;
+using MacroExceptions;
 using MacroGit;
-using nugit.Infrastructure;
 
 namespace nugit
 {
@@ -65,7 +65,7 @@ namespace nugit
             {
                 return DotNugitParser.Parse(File.ReadLines(path));
             }
-            catch (FileParseException e)
+            catch (TextFileParseException e)
             {
                 e.Path = path;
                 throw;
@@ -95,7 +95,7 @@ namespace nugit
 
                 var a = line.Split(' ');
                 if (a.Length != 3)
-                    throw new FileParseException(
+                    throw new TextFileParseException(
                         "Expected URL, commit name, and commit ID",
                         lineNumber,
                         rawline);
@@ -107,7 +107,7 @@ namespace nugit
                 }
                 catch (FormatException fe)
                 {
-                    throw new FileParseException(
+                    throw new TextFileParseException(
                         "Expected valid Git URL",
                         lineNumber,
                         rawline,
@@ -121,7 +121,7 @@ namespace nugit
                 }
                 catch (FormatException fe)
                 {
-                    throw new FileParseException(
+                    throw new TextFileParseException(
                         "Expected valid Git commit name",
                         lineNumber,
                         rawline,
@@ -135,7 +135,7 @@ namespace nugit
                 }
                 catch (FormatException fe)
                 {
-                    throw new FileParseException(
+                    throw new TextFileParseException(
                         "Expected valid Git commit identifier",
                         lineNumber,
                         rawline,

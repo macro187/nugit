@@ -4,6 +4,7 @@ using System.Linq;
 using System;
 using System.IO;
 using System.Reflection;
+using MacroExceptions;
 using MacroGit;
 using nugit.Infrastructure;
 
@@ -13,73 +14,30 @@ namespace nugit
     static class Program
     {
 
-        static int Main(string[] argArray)
+        static int Main(string[] args)
         {
             var traceListener = new ConsoleApplicationTraceListener();
             Trace.Listeners.Add(traceListener);
+
             try
             {
-                var args = new Queue<string>(argArray);
-
-                //
-                // Global switches
-                //
-                while (args.Count > 0 && args.Peek().ToUpperInvariant().StartsWith("--", StringComparison.Ordinal))
+                try
                 {
-                    string swch = args.Dequeue().ToUpperInvariant();
-                    switch (swch)
-                    {
-                        default:
-                            Usage();
-                            throw new UserErrorException("Unrecognised switch '" + swch + "'"); 
-                    }
+                    return Main2(new Queue<string>(args));
                 }
-
-                //
-                // Print program banner
-                //
-                Banner();
-
-                //
-                // Get <command>
-                //
-                if (!args.Any())
+                catch (TextFileParseException tfpe)
                 {
-                    Usage();
-                    throw new UserErrorException("No <command> specified");
-                }
-                string command = args.Dequeue();
-
-                //
-                // Dispatch based on <command>
-                //
-                switch (command.ToUpperInvariant())
-                {
-                    case "HELP":
-                        return Help(args);
-                    case "RESTORE":
-                        return Restore(args);
-                    case "UPDATE":
-                        return Update(args);
-                    case "CLONE":
-                        return Clone(args);
-                    case "INSTALL":
-                        return Install(args);
-                    case "PROGRAMS":
-                        return Programs(args);
-                    default:
-                        Usage();
-                        throw new UserErrorException("Unrecognised <command>");
+                    throw new UserException(tfpe);
                 }
             }
 
             //
             // An expected user-facing error occurred
             //
-            catch (UserErrorException ue)
+            catch (UserException ue)
             {
                 Trace.WriteLine("");
-                Trace.TraceError(ue.Message);
+                foreach (var ex in ue.UserFacingExceptionChain) Trace.TraceError(ex.Message);
                 return 1;
             }
 
@@ -89,9 +47,64 @@ namespace nugit
             catch (Exception e)
             {
                 Trace.WriteLine("");
-                Trace.TraceError("An unexpected error occurred in the program");
-                Trace.TraceError(e.ToString());
+                Trace.TraceError("An internal error occurred in nugit:");
+                Trace.TraceError(ExceptionExtensions.Format(e));
                 return 1;
+            }
+        }
+
+
+        static int Main2(Queue<string> args)
+        {
+            //
+            // Global switches
+            //
+            while (args.Count > 0 && args.Peek().ToUpperInvariant().StartsWith("--", StringComparison.Ordinal))
+            {
+                string swch = args.Dequeue().ToUpperInvariant();
+                switch (swch)
+                {
+                    default:
+                        Usage();
+                        throw new UserException("Unrecognised switch '" + swch + "'"); 
+                }
+            }
+
+            //
+            // Print program banner
+            //
+            Banner();
+
+            //
+            // Get <command>
+            //
+            if (!args.Any())
+            {
+                Usage();
+                throw new UserException("No <command> specified");
+            }
+            string command = args.Dequeue();
+
+            //
+            // Dispatch based on <command>
+            //
+            switch (command.ToUpperInvariant())
+            {
+                case "HELP":
+                    return Help(args);
+                case "RESTORE":
+                    return Restore(args);
+                case "UPDATE":
+                    return Update(args);
+                case "CLONE":
+                    return Clone(args);
+                case "INSTALL":
+                    return Install(args);
+                case "PROGRAMS":
+                    return Programs(args);
+                default:
+                    Usage();
+                    throw new UserException("Unrecognised <command>");
             }
         }
 
@@ -149,7 +162,7 @@ namespace nugit
         static int Help(Queue<string> args)
         {
             Usage();
-            if (args.Any()) throw new UserErrorException("Too many arguments");
+            if (args.Any()) throw new UserException("Too many arguments");
             return 0;
         }
 
@@ -160,9 +173,9 @@ namespace nugit
         ///
         static int Restore(Queue<string> args)
         {
-            if (args.Any()) throw new UserErrorException("Too many arguments");
+            if (args.Any()) throw new UserException("Too many arguments");
             var repository = WhereAmI();
-            if (repository == null) throw new UserErrorException("Not in a repository");
+            if (repository == null) throw new UserException("Not in a repository");
 
             DependencyTraverser.Traverse(repository);
 
@@ -176,9 +189,9 @@ namespace nugit
         ///
         static int Update(Queue<string> args)
         {
-            if (args.Any()) throw new UserErrorException("Too many arguments");
+            if (args.Any()) throw new UserException("Too many arguments");
             var repository = WhereAmI();
-            if (repository == null) throw new UserErrorException("Not in a repository");
+            if (repository == null) throw new UserException("Not in a repository");
 
             repository.DeleteNugitLock();
             DependencyTraverser.Traverse(repository);
@@ -193,10 +206,10 @@ namespace nugit
         ///
         static int Clone(Queue<string> args)
         {
-            if (!args.Any()) throw new UserErrorException("Expected <url>");
+            if (!args.Any()) throw new UserException("Expected <url>");
             var url = new GitUrl(args.Dequeue());
             var version = new GitCommitName(args.Any() ? args.Dequeue() : "master");
-            if (args.Any()) throw new UserErrorException("Too many arguments");
+            if (args.Any()) throw new UserException("Too many arguments");
 
             var repository = WhereAmI();
             var workspace =
@@ -216,10 +229,10 @@ namespace nugit
         ///
         static int Install(Queue<string> args)
         {
-            if (args.Any()) throw new UserErrorException("Too many arguments");
+            if (args.Any()) throw new UserException("Too many arguments");
 
             var repository = WhereAmI();
-            if (repository == null) throw new UserErrorException("Not in a repository");
+            if (repository == null) throw new UserException("Not in a repository");
 
             Installer.Install(repository);
 
@@ -233,7 +246,7 @@ namespace nugit
         ///
         static int Programs(Queue<string> args)
         {
-            if (args.Any()) throw new UserErrorException("Too many arguments");
+            if (args.Any()) throw new UserException("Too many arguments");
 
             var repository = WhereAmI();
 

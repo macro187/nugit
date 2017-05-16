@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using MacroGit;
-using nugit.Infrastructure;
+using MacroExceptions;
 
 namespace nugit
 {
@@ -50,7 +49,7 @@ namespace nugit
                 {
                     var program = line.Substring(PROGRAM_PREFIX.Length).Trim();
                     if (program == "")
-                        throw new FileParseException(
+                        throw new TextFileParseException(
                             "Expected <program>",
                             lineNumber + 1,
                             line);
@@ -70,7 +69,7 @@ namespace nugit
                 }
                 catch (FormatException fe)
                 {
-                    throw new FileParseException(
+                    throw new TextFileParseException(
                         "Invalid dependency URL: " + fe.Message,
                         lineNumber + 1,
                         line,
