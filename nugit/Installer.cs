@@ -3,10 +3,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using MacroDiagnostics;
 using MacroExceptions;
 using MacroGit;
 using MacroSln;
-using nugit.Infrastructure;
 
 namespace nugit
 {
@@ -49,7 +49,7 @@ namespace nugit
             var slnLocalPathComponents = SplitPath(slnLocalPath);
             var slnToWorkspacePath = Path.Combine(Enumerable.Repeat("..", slnLocalPathComponents.Length + 1).ToArray());
 
-            using (TraceExtensions.Step("Installing projects from " + dependencyName))
+            using (LogicalOperation.Start("Installing projects from " + dependencyName))
             {
                 var dependencyRepository = repository.Workspace.GetRepository(dependencyName);
 
@@ -128,7 +128,7 @@ namespace nugit
 
         static void DeleteNugitSolutionFolders(VisualStudioSolution sln)
         {
-            using (TraceExtensions.Step("Deleting nugit-controlled solution folders"))
+            using (LogicalOperation.Start("Deleting nugit-controlled solution folders"))
             {
                 for (;;)
                 {

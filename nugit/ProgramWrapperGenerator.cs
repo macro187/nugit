@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using MacroDiagnostics;
 using MacroCollections;
-using nugit.Infrastructure;
 
 namespace nugit
 {
@@ -30,7 +30,7 @@ namespace nugit
                 scripts.AddRange(GenerateProgramWrappers(repository));
             }
 
-            using (TraceExtensions.Step("Deleting orphan program wrapper scripts"))
+            using (LogicalOperation.Start("Deleting orphan program wrapper scripts"))
             {
                 foreach (var file in Directory.GetFiles(workspace.GetProgramWrapperDirectory()))
                 {
@@ -59,7 +59,7 @@ namespace nugit
             var dotNugit = repository.ReadDotNugit();
             if (dotNugit.Programs.Count == 0) return paths;
 
-            using (TraceExtensions.Step("Writing program wrapper script(s) for " + repository.Name))
+            using (LogicalOperation.Start("Writing program wrapper script(s) for " + repository.Name))
             {
                 var programDirectory = repository.Workspace.GetProgramWrapperDirectory();
 

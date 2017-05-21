@@ -4,9 +4,10 @@ using System.Linq;
 using System;
 using System.IO;
 using System.Reflection;
+using MacroIO;
 using MacroExceptions;
+using MacroConsole;
 using MacroGit;
-using nugit.Infrastructure;
 
 namespace nugit
 {
@@ -127,7 +128,7 @@ namespace nugit
             Trace.TraceInformation(description);
             Trace.TraceInformation("{0} {1}", copyright, authors);
             Trace.TraceInformation("==============================");
-
+            Trace.TraceInformation("");
         }
 
 
@@ -144,7 +145,7 @@ namespace nugit
             {
                 foreach (
                     var line
-                    in ReadmeParser.SelectSections(
+                    in ReadmeFilter.SelectSections(
                         reader.ReadAllLines(),
                         "Synopsis",
                         "Commands"))

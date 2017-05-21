@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
 using MacroGit;
-using nugit.Infrastructure;
 using System.Collections.Generic;
 using System.Linq;
 using MacroSystem;
+using MacroDiagnostics;
 
 namespace nugit
 {
@@ -138,7 +138,7 @@ namespace nugit
             
             if (!Directory.Exists(path))
             {
-                using (TraceExtensions.Step("Creating " + path))
+                using (LogicalOperation.Start("Creating " + path))
                 {
                     Directory.CreateDirectory(path);
                 }

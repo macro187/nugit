@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using MacroSystem;
 using MacroGuards;
+using MacroDiagnostics;
 using MacroGit;
-using nugit.Infrastructure;
 
 namespace nugit
 {
@@ -36,7 +36,7 @@ namespace nugit
         ///
         public static IList<GitRepositoryName> GetAllDependencies(Repository repository)
         {
-            using (TraceExtensions.Step("Calculating dependencies"))
+            using (LogicalOperation.Start("Calculating dependencies"))
             {
                 var names = new List<GitRepositoryName>();
                 Traverse(repository, (d,r) => names.Add(r.Name));
@@ -259,7 +259,7 @@ namespace nugit
 
         static void Clone(string parentPath, GitUrl url)
         {
-            using (TraceExtensions.Step("Cloning " + url.RepositoryName))
+            using (LogicalOperation.Start("Cloning " + url.RepositoryName))
             {
                 GitRepository.Clone(parentPath, url);
             }
@@ -268,7 +268,7 @@ namespace nugit
 
         static void CheckOut(Repository repository, GitCommitName commit)
         {
-            using (TraceExtensions.Step("Checking out " + repository.Name + " to " + commit))
+            using (LogicalOperation.Start("Checking out " + repository.Name + " to " + commit))
             {
                 repository.Checkout(commit);
             }

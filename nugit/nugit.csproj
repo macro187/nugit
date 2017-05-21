@@ -62,16 +62,12 @@
   <ItemGroup>
     <Compile Include="LockDependency.cs" />
     <Compile Include="DependencyUrl.cs" />
-    <Compile Include="Infrastructure\ReadmeParser.cs" />
-    <Compile Include="Infrastructure\StreamReaderExtensions.cs" />
-    <Compile Include="Infrastructure\TraceExtensions.cs" />
     <Compile Include="Dependency.cs" />
     <Compile Include="ProgramWrapperGenerator.cs" />
     <Compile Include="Installer.cs" />
     <Compile Include="DotNuGit.cs" />
     <Compile Include="DotNuGitParser.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Infrastructure\ConsoleApplicationTraceListener.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository.cs" />
@@ -104,6 +100,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\macro-sharp-console\MacroConsole\MacroConsole.csproj">
+      <Project>{d6b3952f-d41f-4ce8-9173-448d01e7bb08}</Project>
+      <Name>MacroConsole</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\macro-sharp-git\MacroGit\MacroGit.csproj">
       <Project>{2852b710-2752-4f72-963c-46d92f6c5c2e}</Project>
       <Name>MacroGit</Name>
@@ -127,6 +127,10 @@
     <ProjectReference Include="..\..\macro-sharp\MacroGuards\MacroGuards.csproj">
       <Project>{0049d988-2426-45b0-8fda-eab78622d887}</Project>
       <Name>MacroGuards</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\macro-sharp\MacroIO\MacroIO.csproj">
+      <Project>{3515e94d-d914-40e3-b0b4-16ddd2bd477f}</Project>
+      <Name>MacroIO</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\macro-sharp\MacroSystem\MacroSystem.csproj">
       <Project>{4b9b553a-b600-4dae-ac79-1d0cb0b35584}</Project>
