@@ -276,14 +276,11 @@ namespace nugit
         ///
         static Repository WhereAmI()
         {
-            var dir = new DirectoryInfo(Environment.CurrentDirectory);
-            while (true)
-            {
-                if (dir.Parent == null) return null;
-                if (Directory.Exists(Path.Combine(dir.FullName, ".git"))) break;
-                dir = dir.Parent;
-            }
-            return new Workspace(dir.Parent.FullName).FindRepository(new GitRepositoryName(dir.Name));
+            var repo = GitRepository.FindContainingRepository(Environment.CurrentDirectory);
+            if (repo == null) return null;
+            return
+                new Workspace(Path.GetDirectoryName(repo.Path))
+                    .FindRepository(new GitRepositoryName(Path.GetFileName(repo.Path)));
         }
 
     }
