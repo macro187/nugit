@@ -8,6 +8,7 @@ using MacroIO;
 using MacroExceptions;
 using MacroConsole;
 using MacroGit;
+using NuGitLib;
 
 namespace nugit
 {

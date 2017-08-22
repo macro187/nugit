@@ -5,7 +5,7 @@ using System.IO;
 using MacroDiagnostics;
 using MacroCollections;
 
-namespace nugit
+namespace NuGitLib
 {
 
     /// <summary>

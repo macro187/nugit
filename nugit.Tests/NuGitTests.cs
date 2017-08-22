@@ -10,7 +10,7 @@ namespace nugit.Tests
 {
 
     [TestClass]
-    public class NugitTests
+    public class NuGitTests
     {
 
         static string here = Path.GetFullPath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));

@@ -6,7 +6,7 @@ using System.Linq;
 using MacroSystem;
 using MacroDiagnostics;
 
-namespace nugit
+namespace NuGitLib
 {
 
     /// <summary>

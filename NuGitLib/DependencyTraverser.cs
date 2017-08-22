@@ -6,7 +6,7 @@ using MacroGuards;
 using MacroDiagnostics;
 using MacroGit;
 
-namespace nugit
+namespace NuGitLib
 {
 
     /// <summary>

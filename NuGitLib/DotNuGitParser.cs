@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using MacroExceptions;
 
-namespace nugit
+namespace NuGitLib
 {
 
     /// <summary>

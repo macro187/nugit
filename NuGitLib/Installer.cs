@@ -8,7 +8,7 @@ using MacroExceptions;
 using MacroGit;
 using MacroSln;
 
-namespace nugit
+namespace NuGitLib
 {
 
     /// <summary>
