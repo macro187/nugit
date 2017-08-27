@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using MacroGuards;
 using MacroDiagnostics;
 using MacroExceptions;
 using MacroGit;
@@ -36,8 +37,8 @@ Install(NuGitRepository repository)
 {
     if (repository == null) throw new ArgumentNullException("repository");
 
-    var sln = VisualStudioSolution.Find(repository.Path);
-    if (sln == null) throw new UserException("No .sln file in repo");
+    var sln = repository.FindVisualStudioSolution();
+    if (sln == null) throw new UserException("No Visual Studio solution found in repo");
 
     DeleteNugitSolutionFolders(sln);
 
@@ -53,26 +54,29 @@ Install(NuGitRepository repository)
 static void
 Install(NuGitRepository repository, VisualStudioSolution sln, GitRepositoryName dependencyName)
 {
+    var workspace = repository.Workspace;
+
     var slnLocalPath = GetLocalPath(repository.Path, Path.GetDirectoryName(sln.Path));
     var slnLocalPathComponents = SplitPath(slnLocalPath);
     var slnToWorkspacePath = Path.Combine(Enumerable.Repeat("..", slnLocalPathComponents.Length + 1).ToArray());
 
     using (LogicalOperation.Start("Installing projects from " + dependencyName))
     {
-        var dependencyRepository = repository.Workspace.GetRepository(dependencyName);
+        var dependencyRepository = workspace.GetRepository(dependencyName);
 
-        var dependencySln = VisualStudioSolution.Find(dependencyRepository.Path);
+        var dependencySln = dependencyRepository.FindVisualStudioSolution();
         if (dependencySln == null)
         {
-            Trace.TraceInformation("No .sln found");
+            Trace.TraceInformation("No Visual Studio solution found");
             return;
         }
-        Trace.TraceInformation("Found " + Path.GetFileName(dependencySln.Path));
 
-        var dependencySlnLocalPath =
-            GetLocalPath(dependencyRepository.Path, Path.GetDirectoryName(dependencySln.Path));
+        var dependencySlnDir = Path.GetDirectoryName(dependencySln.Path);
+        var dependencySlnLocalPath = GetLocalPath(dependencyRepository.Path, dependencySln.Path);
 
-        var dependencyProjects = FindDependencyProjects(dependencySln);
+        Trace.TraceInformation("Found " + dependencySlnLocalPath);
+
+        var dependencyProjects = FindDependencyProjects(dependencyRepository, dependencySln);
         if (dependencyProjects.Count == 0)
         {
             Trace.TraceInformation("No projects found in solution");
@@ -87,31 +91,34 @@ Install(NuGitRepository repository, VisualStudioSolution sln, GitRepositoryName 
 
         var dependencyFolderId = sln.AddSolutionFolder(NugitFolderPrefix + dependencyName);
 
-        foreach (var p in dependencyProjects)
+        foreach (var project in dependencyProjects)
         {
-            Trace.TraceInformation("Installing " + Path.GetFileName(p.Location));
+            var projectPath = Path.GetFullPath(Path.Combine(dependencySlnDir, project.Location));
+            var projectLocalPath = GetLocalPath(dependencyRepository.Path, projectPath);
+
+            Trace.TraceInformation("Installing " + projectLocalPath);
 
             //
             // Add reference to the dependency project
             //
             sln.AddProjectReference(
-                p.TypeId,
-                p.Name,
-                Path.Combine(slnToWorkspacePath, dependencyName, dependencySlnLocalPath, p.Location),
-                p.Id);
+                project.TypeId,
+                project.Name,
+                Path.Combine(slnToWorkspacePath, dependencyName, projectLocalPath),
+                project.Id);
 
             //
             // Put it in the dependency's solution folder
             //
-            sln.AddNestedProject(p.Id, dependencyFolderId);
+            sln.AddNestedProject(project.Id, dependencyFolderId);
 
             //
             // Add solution -> project configuration mappings
             //
             foreach (string configuration in configurationsInCommon)
             {
-                sln.AddProjectConfiguration(p.Id, configuration, "ActiveCfg", configuration);
-                sln.AddProjectConfiguration(p.Id, configuration, "Build.0", configuration);
+                sln.AddProjectConfiguration(project.Id, configuration, "ActiveCfg", configuration);
+                sln.AddProjectConfiguration(project.Id, configuration, "Build.0", configuration);
             }
         }
     }
@@ -119,8 +126,9 @@ Install(NuGitRepository repository, VisualStudioSolution sln, GitRepositoryName 
 
 
 static List<VisualStudioProjectReference>
-FindDependencyProjects(VisualStudioSolution sln)
+FindDependencyProjects(NuGitRepository repository, VisualStudioSolution sln)
 {
+    var slnDir = Path.GetDirectoryName(sln.Path);
     return sln.ProjectReferences
         .Where(p => !p.Name.EndsWith(".Tests", StringComparison.OrdinalIgnoreCase))
         .Where(p => !(p.Name.IndexOf(".Tests.", StringComparison.OrdinalIgnoreCase) > -1))
@@ -128,7 +136,7 @@ FindDependencyProjects(VisualStudioSolution sln)
         .Where(p => !(p.TypeId == VisualStudioProjectTypeIds.SolutionFolder))
         .Where(p => !string.IsNullOrWhiteSpace(p.Location))
         .Where(p => !Path.IsPathRooted(p.Location))
-        .Where(p => !p.Location.StartsWith("..", StringComparison.Ordinal))
+        .Where(p => PathContains(repository.Path, Path.GetFullPath(Path.Combine(slnDir, p.Location))))
         .Where(p => !p.GetProject().ProjectTypeGuids.Contains(VisualStudioProjectTypeIds.Test))
         .OrderBy(p => p.Name)
         .ToList();
@@ -163,27 +171,31 @@ SplitPath(string path)
 }
 
 
-static string
-GetLocalPath(string fromPath, string toPath)
+static bool
+PathContains(string ancestorPath, string descendantPath)
 {
-    if (fromPath == null)
-        throw new ArgumentNullException("fromPath");
-    if (toPath == null)
-        throw new ArgumentNullException("toPath");
-    if (toPath == fromPath)
-        return "";
+    Guard.NotNull(ancestorPath, nameof(ancestorPath));
+    Guard.NotNull(descendantPath, nameof(descendantPath));
 
-    var fromPathComponents = SplitPath(fromPath);
-    var toPathComponents = SplitPath(toPath);
+    var ancestorComponents = SplitPath(ancestorPath);
+    var descendantComponents = SplitPath(descendantPath);
 
-    if (!fromPathComponents.SequenceEqual(
-        toPathComponents.Take(fromPathComponents.Length),
-        StringComparer.Ordinal))
-    {
-        throw new ArgumentException("toPath isn't under fromPath", "toPath");
-    }
+    return ancestorComponents.SequenceEqual(
+        descendantComponents.Take(ancestorComponents.Length),
+        StringComparer.Ordinal);
+}
 
-    return Path.Combine(toPathComponents.Skip(fromPathComponents.Length).ToArray());
+
+static string
+GetLocalPath(string ancestorPath, string descendantPath)
+{
+    Guard.NotNull(ancestorPath, nameof(ancestorPath));
+    Guard.NotNull(descendantPath, nameof(descendantPath));
+
+    if (!PathContains(ancestorPath, descendantPath))
+        throw new ArgumentException("Not an descendant of ancestorPath", nameof(descendantPath));
+
+    return Path.Combine(SplitPath(descendantPath).Skip(SplitPath(ancestorPath).Length).ToArray());
 }
 
 

@@ -6,7 +6,7 @@ using System.Linq;
 using MacroGuards;
 using MacroExceptions;
 using MacroGit;
-
+using MacroSln;
 
 namespace
 NuGitLib
@@ -200,6 +200,17 @@ DeleteNuGitLock()
     string path = IOPath.Combine(dotNugitDir, ".nugit.lock");
     if (!File.Exists(path)) return;
     File.Delete(path);
+}
+
+
+/// <summary>
+/// Look for the primary Visual Studio solution in the repository
+/// </summary>
+///
+public VisualStudioSolution
+FindVisualStudioSolution()
+{
+    return VisualStudioSolution.Find(GetDotNugitDir());
 }
 
 
