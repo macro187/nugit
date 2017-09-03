@@ -109,8 +109,6 @@ Main2(Queue<string> args)
             return Clone(args);
         case "INSTALL":
             return Install(args);
-        case "PROGRAMS":
-            return Programs(args);
         default:
             Usage();
             throw new UserException("Unrecognised <command>");
@@ -251,30 +249,6 @@ Install(Queue<string> args)
     if (repository == null) throw new UserException("Not in a repository");
 
     NuGitInstaller.Install(repository);
-
-    return 0;
-}
-
-
-/// <summary>
-/// The <c>programs</c> command
-/// </summary>
-///
-static int
-Programs(Queue<string> args)
-{
-    if (args.Any()) throw new UserException("Too many arguments");
-
-    var repository = WhereAmI();
-
-    if (repository != null)
-    {
-        NuGitProgramWrapperGenerator.GenerateProgramWrappers(repository);
-    }
-    else
-    {
-        NuGitProgramWrapperGenerator.GenerateProgramWrappers(new NuGitWorkspace(Environment.CurrentDirectory));
-    }
 
     return 0;
 }

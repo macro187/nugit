@@ -54,7 +54,6 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="NuGitInstaller.cs" />
     <Compile Include="NuGitLockDependency.cs" />
-    <Compile Include="NuGitProgramWrapperGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="NuGitRepository.cs" />
     <Compile Include="NuGitWorkspace.cs" />

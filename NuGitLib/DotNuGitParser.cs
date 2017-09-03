@@ -18,10 +18,6 @@ DotNuGitParser
 {
 
 
-const string
-PROGRAM_PREFIX = "program: ";
-
-
 [System.Diagnostics.CodeAnalysis.SuppressMessage(
     "Microsoft.Performance",
     "CA1820:TestForEmptyStringsUsingStringLength",
@@ -32,7 +28,6 @@ Parse(IEnumerable<string> lines)
     if (lines == null) throw new ArgumentNullException("lines");
 
     var dependencies = new List<NuGitDependency>();
-    var programs = new List<string>();
 
     int lineNumber = 0;
     foreach (string line in lines)
@@ -48,23 +43,6 @@ Parse(IEnumerable<string> lines)
         // # <comment>
         //
         if (line.StartsWith("#", StringComparison.Ordinal)) continue;
-
-        //
-        // program: <program>
-        //
-        if (line.StartsWith(PROGRAM_PREFIX, StringComparison.OrdinalIgnoreCase))
-        {
-            var program = line.Substring(PROGRAM_PREFIX.Length).Trim();
-            if (program == "")
-                throw new TextFileParseException(
-                    "Expected <program>",
-                    lineNumber + 1,
-                    line);
-            program = program.Replace('/', '\\');
-            program = program.Replace('\\', Path.DirectorySeparatorChar);
-            programs.Add(program);
-            continue;
-        }
 
         //
         // <dependencyurl>
@@ -86,7 +64,7 @@ Parse(IEnumerable<string> lines)
         dependencies.Add(url.Dependency);
     }
 
-    return new DotNuGit(dependencies, programs);
+    return new DotNuGit(dependencies);
 }
 
 

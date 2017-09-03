@@ -20,18 +20,16 @@ DotNuGit
 
 public
 DotNuGit()
-    : this(new NuGitDependency[0], new string[0])
+    : this(new NuGitDependency[0])
 {
 }
 
 
 public
-DotNuGit(IEnumerable<NuGitDependency> dependencies, IEnumerable<string> programs)
+DotNuGit(IEnumerable<NuGitDependency> dependencies)
 {
     if (dependencies == null) throw new ArgumentNullException("dependencies");
-    if (programs == null) throw new ArgumentNullException("programs");
     Dependencies = new ReadOnlyCollection<NuGitDependency>(dependencies.ToList());
-    Programs = new ReadOnlyCollection<string>(programs.ToList());
 }
 
 
@@ -41,18 +39,6 @@ DotNuGit(IEnumerable<NuGitDependency> dependencies, IEnumerable<string> programs
 ///
 public IList<NuGitDependency>
 Dependencies
-{
-    get;
-    private set;
-}
-
-
-/// <summary>
-/// Relative paths to program executables in this repository
-/// </summary>
-///
-public ICollection<string>
-Programs
 {
     get;
     private set;

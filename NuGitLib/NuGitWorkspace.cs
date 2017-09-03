@@ -22,15 +22,6 @@ NuGitWorkspace
 
 
 /// <summary>
-/// Name of special workspace subdirectory containing wrapper scripts for running programs in the repositories
-/// in the workspace
-/// </summary>
-///
-const string
-ProgramWrapperDirectoryName = ".bin";
-
-
-/// <summary>
 /// Initialise a new workspace
 /// </summary>
 ///
@@ -131,32 +122,6 @@ GetRepositories()
             .Where(path => NuGitRepository.IsRepository(path))
             .Select(path => new GitRepositoryName(Path.GetFileName(path)))
             .Select(name => new NuGitRepository(this, name));
-}
-
-
-/// <summary>
-/// Get full path to (and if necessary create) a special workspace subdirectory for wrapper scripts that run
-/// programs in the repositories in the workspace
-/// </summary>
-///
-[System.Diagnostics.CodeAnalysis.SuppressMessage(
-    "Microsoft.Design",
-    "CA1024:UsePropertiesWhereAppropriate",
-    Justification = "This method can have side-effects")]
-public string
-GetProgramWrapperDirectory()
-{
-    var path = Path.Combine(RootPath, ProgramWrapperDirectoryName);
-    
-    if (!Directory.Exists(path))
-    {
-        using (LogicalOperation.Start("Creating " + path))
-        {
-            Directory.CreateDirectory(path);
-        }
-    }
-    
-    return path;
 }
 
 
