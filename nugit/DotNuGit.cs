@@ -5,7 +5,7 @@ using System.Linq;
 
 
 namespace
-NuGitLib
+nugit
 {
 
 
@@ -20,16 +20,16 @@ DotNuGit
 
 public
 DotNuGit()
-    : this(new NuGitDependency[0])
+    : this(new Dependency[0])
 {
 }
 
 
 public
-DotNuGit(IEnumerable<NuGitDependency> dependencies)
+DotNuGit(IEnumerable<Dependency> dependencies)
 {
     if (dependencies == null) throw new ArgumentNullException("dependencies");
-    Dependencies = new ReadOnlyCollection<NuGitDependency>(dependencies.ToList());
+    Dependencies = new ReadOnlyCollection<Dependency>(dependencies.ToList());
 }
 
 
@@ -37,7 +37,7 @@ DotNuGit(IEnumerable<NuGitDependency> dependencies)
 /// Other repositories required by this one
 /// </summary>
 ///
-public IList<NuGitDependency>
+public IList<Dependency>
 Dependencies
 {
     get;

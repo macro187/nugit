@@ -9,7 +9,7 @@ using MacroGit;
 using MacroSln;
 
 namespace
-NuGitLib
+nugit
 {
 
 
@@ -86,14 +86,14 @@ ReadDotNuGit()
 /// Read dependency information from .nugit.lock
 /// </summary>
 ///
-public IList<NuGitLockDependency>
+public IList<LockDependency>
 ReadNuGitLock()
 {
     string dotNugitDir = GetDotNugitDir();
     string path = IOPath.Combine(dotNugitDir, ".nugit.lock");
-    if (!File.Exists(path)) return new NuGitLockDependency[0];
+    if (!File.Exists(path)) return new LockDependency[0];
 
-    var result = new List<NuGitLockDependency>();
+    var result = new List<LockDependency>();
     int lineNumber = 0;
     foreach (var rawline in File.ReadLines(path))
     {
@@ -152,7 +152,7 @@ ReadNuGitLock()
                 fe);
         }
 
-        result.Add(new NuGitLockDependency(url, commitName, commitId));
+        result.Add(new LockDependency(url, commitName, commitId));
     }
 
     return result;
@@ -164,7 +164,7 @@ ReadNuGitLock()
 /// </summary>
 ///
 public void
-WriteNuGitLock(ICollection<NuGitLockDependency> dependencies)
+WriteNuGitLock(ICollection<LockDependency> dependencies)
 {
     Guard.NotNull(dependencies, nameof(dependencies));
 

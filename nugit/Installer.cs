@@ -11,7 +11,7 @@ using MacroSln;
 
 
 namespace
-NuGitLib
+nugit
 {
 
 
@@ -20,7 +20,7 @@ NuGitLib
 /// </summary>
 ///
 public static class
-NuGitInstaller
+Installer
 {
 
 
@@ -42,7 +42,7 @@ Install(NuGitRepository repository)
 
     DeleteNugitSolutionFolders(sln);
 
-    foreach (var repoName in NuGitDependencyTraverser.GetAllDependencies(repository))
+    foreach (var repoName in DependencyTraverser.GetAllDependencies(repository))
     {
         Install(repository, sln, repoName);
     }

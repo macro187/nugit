@@ -8,7 +8,7 @@ using MacroGit;
 
 
 namespace
-NuGitLib
+nugit
 {
 
 
@@ -31,7 +31,7 @@ NuGitLib
 /// </remarks>
 ///
 public static class
-NuGitDependencyTraverser
+DependencyTraverser
 {
 
 
@@ -77,11 +77,11 @@ Traverse(NuGitRepository repository)
 /// </param>
 ///
 public static void
-Traverse(NuGitRepository repository, Action<NuGitDependency,NuGitRepository> onVisited)
+Traverse(NuGitRepository repository, Action<Dependency,NuGitRepository> onVisited)
 {
     if (repository == null) throw new ArgumentNullException("repository");
 
-    IList<NuGitLockDependency> lockDependencies;
+    IList<LockDependency> lockDependencies;
 
     lockDependencies = repository.ReadNuGitLock();
     if (lockDependencies.Count > 0)
@@ -90,7 +90,7 @@ Traverse(NuGitRepository repository, Action<NuGitDependency,NuGitRepository> onV
         return;
     }
 
-    lockDependencies = new List<NuGitLockDependency>();
+    lockDependencies = new List<LockDependency>();
 
     Traverse(
         repository.Workspace,
@@ -100,7 +100,7 @@ Traverse(NuGitRepository repository, Action<NuGitDependency,NuGitRepository> onV
         new HashSet<GitRepositoryName>() { repository.Name },
         (d,r) => {
             onVisited(d,r);
-            lockDependencies.Add(new NuGitLockDependency(d.Url, d.CommitName, r.GetCommitId()));
+            lockDependencies.Add(new LockDependency(d.Url, d.CommitName, r.GetCommitId()));
             }
         );
 
@@ -111,8 +111,8 @@ Traverse(NuGitRepository repository, Action<NuGitDependency,NuGitRepository> onV
 static void
 TraverseLock(
     NuGitRepository repository,
-    IList<NuGitLockDependency> lockDependencies,
-    Action<NuGitDependency,NuGitRepository> onVisited
+    IList<LockDependency> lockDependencies,
+    Action<Dependency,NuGitRepository> onVisited
 )
 {
     var workspace = repository.Workspace;
@@ -144,7 +144,7 @@ TraverseLock(
 /// </summary>
 ///
 public static void
-Traverse(NuGitWorkspace workspace, IEnumerable<NuGitDependency> dependencies)
+Traverse(NuGitWorkspace workspace, IEnumerable<Dependency> dependencies)
 {
     Traverse(workspace, dependencies, (d,r) => {});
 }
@@ -167,8 +167,8 @@ Traverse(NuGitWorkspace workspace, IEnumerable<NuGitDependency> dependencies)
 static void
 Traverse(
     NuGitWorkspace workspace,
-    IEnumerable<NuGitDependency> dependencies,
-    Action<NuGitDependency,NuGitRepository> onVisited)
+    IEnumerable<Dependency> dependencies,
+    Action<Dependency,NuGitRepository> onVisited)
 {
     Traverse(
         workspace,
@@ -183,11 +183,11 @@ Traverse(
 static void
 Traverse(
     NuGitWorkspace workspace,
-    IEnumerable<NuGitDependency> dependencies,
+    IEnumerable<Dependency> dependencies,
     NuGitRepository requiredBy,
     IDictionary<GitRepositoryName,GitCommitName> checkedOut,
     ISet<GitRepositoryName> visited,
-    Action<NuGitDependency,NuGitRepository> onVisited
+    Action<Dependency,NuGitRepository> onVisited
     )
 {
     Guard.NotNull(workspace, nameof(workspace));

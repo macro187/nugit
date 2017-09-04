@@ -3,7 +3,7 @@ using MacroGit;
 
 
 namespace
-NuGitLib
+nugit
 {
 
 
@@ -12,13 +12,13 @@ NuGitLib
 /// </summary>
 ///
 public class
-NuGitLockDependency
-    : NuGitDependency
+LockDependency
+    : Dependency
 {
 
 
 public
-NuGitLockDependency(GitUrl url, GitCommitName commitName, GitCommitName commitId)
+LockDependency(GitUrl url, GitCommitName commitName, GitCommitName commitId)
     : base(url, commitName)
 {
     Guard.NotNull(commitId, nameof(commitId));

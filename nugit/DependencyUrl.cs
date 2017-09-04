@@ -4,7 +4,7 @@ using MacroGit;
 
 
 namespace
-NuGitLib
+nugit
 {
 
 
@@ -41,7 +41,7 @@ NuGitLib
 "CA2237:MarkISerializableTypesWithSerializable",
 Justification = "Don't care")]
 public class
-NuGitDependencyUrl
+DependencyUrl
     : Uri
 {
 
@@ -54,7 +54,7 @@ DefaultCommitName = "master";
     "Microsoft.Usage", "CA2225:OperatorOverloadsHaveNamedAlternates",
     Justification = "Covered by Uri.ToString()")]
 public static
-implicit operator string(NuGitDependencyUrl url)
+implicit operator string(DependencyUrl url)
 {
     if (url == null) return null;
     return url.ToString();
@@ -62,7 +62,7 @@ implicit operator string(NuGitDependencyUrl url)
 
 
 public
-NuGitDependencyUrl(NuGitDependency dependency)
+DependencyUrl(Dependency dependency)
     : this(
         string.Concat(
             Guard.NotNull(dependency, nameof(dependency)).Url,
@@ -82,7 +82,7 @@ NuGitDependencyUrl(NuGitDependency dependency)
     "Microsoft.Naming", "CA1720:IdentifiersShouldNotContainTypeNames", MessageId = "string",
     Justification = "Staying consistent with System.Uri constructor")]
 public
-NuGitDependencyUrl(string urlString)
+DependencyUrl(string urlString)
     : base(
         Guard.NotNull(urlString, nameof(urlString)),
         UriKind.Absolute)
@@ -113,7 +113,7 @@ NuGitDependencyUrl(string urlString)
     if (Query != "")
         throw new FormatException("Query components are not permitted in dependency URLs");
 
-    Dependency = new NuGitDependency(url, commitName);
+    Dependency = new Dependency(url, commitName);
 }
 
 
@@ -121,7 +121,7 @@ NuGitDependencyUrl(string urlString)
 /// The dependency expressed by the URL
 /// </summary>
 ///
-public NuGitDependency
+public Dependency
 Dependency
 {
     get;

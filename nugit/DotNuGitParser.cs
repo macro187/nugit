@@ -5,7 +5,7 @@ using MacroExceptions;
 
 
 namespace
-NuGitLib
+nugit
 {
 
 
@@ -27,7 +27,7 @@ Parse(IEnumerable<string> lines)
 {
     if (lines == null) throw new ArgumentNullException("lines");
 
-    var dependencies = new List<NuGitDependency>();
+    var dependencies = new List<Dependency>();
 
     int lineNumber = 0;
     foreach (string line in lines)
@@ -47,10 +47,10 @@ Parse(IEnumerable<string> lines)
         //
         // <dependencyurl>
         //
-        NuGitDependencyUrl url;
+        DependencyUrl url;
         try
         {
-            url = new NuGitDependencyUrl(line.Trim());
+            url = new DependencyUrl(line.Trim());
         }
         catch (FormatException fe)
         {

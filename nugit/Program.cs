@@ -8,7 +8,6 @@ using MacroIO;
 using MacroExceptions;
 using MacroConsole;
 using MacroGit;
-using NuGitLib;
 
 
 namespace
@@ -188,7 +187,7 @@ Restore(Queue<string> args)
     var repository = WhereAmI();
     if (repository == null) throw new UserException("Not in a repository");
 
-    NuGitDependencyTraverser.Traverse(repository);
+    DependencyTraverser.Traverse(repository);
 
     return 0;
 }
@@ -206,7 +205,7 @@ Update(Queue<string> args)
     if (repository == null) throw new UserException("Not in a repository");
 
     repository.DeleteNuGitLock();
-    NuGitDependencyTraverser.Traverse(repository);
+    DependencyTraverser.Traverse(repository);
 
     return 0;
 }
@@ -230,7 +229,7 @@ Clone(Queue<string> args)
             ? repository.Workspace
             : new NuGitWorkspace(Environment.CurrentDirectory);
 
-    NuGitDependencyTraverser.Traverse(workspace, new NuGitDependency[] { new NuGitDependency(url, version) });
+    DependencyTraverser.Traverse(workspace, new Dependency[] { new Dependency(url, version) });
 
     return 0;
 }
@@ -248,7 +247,7 @@ Install(Queue<string> args)
     var repository = WhereAmI();
     if (repository == null) throw new UserException("Not in a repository");
 
-    NuGitInstaller.Install(repository);
+    Installer.Install(repository);
 
     return 0;
 }

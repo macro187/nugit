@@ -8,7 +8,7 @@ using MacroDiagnostics;
 
 
 namespace
-NuGitLib
+nugit
 {
 
 
