@@ -25,7 +25,7 @@ Installer
 
 
 const string
-NugitFolderPrefix = "nugit-";
+NuGitFolderPrefix = "nugit-";
 
 
 /// <summary>
@@ -35,16 +35,25 @@ NugitFolderPrefix = "nugit-";
 public static void
 Install(NuGitRepository repository)
 {
-    if (repository == null) throw new ArgumentNullException("repository");
+    Guard.NotNull(repository, nameof(repository));
 
     var sln = repository.FindVisualStudioSolution();
     if (sln == null) throw new UserException("No Visual Studio solution found in repo");
 
-    DeleteNugitSolutionFolders(sln);
+    var repoNames = DependencyTraverser.GetAllDependencies(repository);
 
-    foreach (var repoName in DependencyTraverser.GetAllDependencies(repository))
+    var oldFolderIds =
+        sln.SolutionFolders
+            .Where(f => IsNuGitFolder(f.Name))
+            .ToDictionary(f => f.Name, f => f.Id);
+
+    DeleteNuGitFolders(sln);
+
+    foreach (var repoName in repoNames)
     {
-        Install(repository, sln, repoName);
+        var folderName = NuGitFolderPrefix + repoName;
+        oldFolderIds.TryGetValue(folderName, out string folderId);
+        Install(repository, sln, repoName, folderName, folderId);
     }
 
     sln.Save();
@@ -52,7 +61,13 @@ Install(NuGitRepository repository)
 
 
 static void
-Install(NuGitRepository repository, VisualStudioSolution sln, GitRepositoryName dependencyName)
+Install(
+    NuGitRepository repository,
+    VisualStudioSolution sln,
+    GitRepositoryName dependencyName,
+    string folderName,
+    string folderId
+    )
 {
     var workspace = repository.Workspace;
 
@@ -60,36 +75,28 @@ Install(NuGitRepository repository, VisualStudioSolution sln, GitRepositoryName 
     var slnLocalPathComponents = SplitPath(slnLocalPath);
     var slnToWorkspacePath = Path.Combine(Enumerable.Repeat("..", slnLocalPathComponents.Length + 1).ToArray());
 
-    using (LogicalOperation.Start("Installing projects from " + dependencyName))
+    var dependencyRepository = workspace.GetRepository(dependencyName);
+
+    var dependencySln = dependencyRepository.FindVisualStudioSolution();
+    if (dependencySln == null) return;
+
+    var dependencySlnDir = Path.GetDirectoryName(dependencySln.Path);
+
+    var dependencyProjects = FindDependencyProjects(dependencyRepository, dependencySln);
+    if (dependencyProjects.Count == 0) return;
+
+    using (LogicalOperation.Start("Installing projects from " + dependencySln.Path))
     {
-        var dependencyRepository = workspace.GetRepository(dependencyName);
-
-        var dependencySln = dependencyRepository.FindVisualStudioSolution();
-        if (dependencySln == null)
-        {
-            Trace.TraceInformation("No Visual Studio solution found");
-            return;
-        }
-
-        var dependencySlnDir = Path.GetDirectoryName(dependencySln.Path);
-        var dependencySlnLocalPath = GetLocalPath(dependencyRepository.Path, dependencySln.Path);
-
-        Trace.TraceInformation("Found " + dependencySlnLocalPath);
-
-        var dependencyProjects = FindDependencyProjects(dependencyRepository, dependencySln);
-        if (dependencyProjects.Count == 0)
-        {
-            Trace.TraceInformation("No projects found in solution");
-            return;
-        }
-
         // TODO Consider configurations in each individual dependency project, not just the solution
         var configurationsInCommon =
             sln.SolutionConfigurations.Intersect(dependencySln.SolutionConfigurations)
                 .OrderBy(s => s)
                 .ToList();
 
-        var dependencyFolderId = sln.AddSolutionFolder(NugitFolderPrefix + dependencyName);
+        var folder =
+            folderId != null
+                ? sln.AddSolutionFolder(folderName, folderId)
+                : sln.AddSolutionFolder(folderName);
 
         foreach (var project in dependencyProjects)
         {
@@ -110,7 +117,7 @@ Install(NuGitRepository repository, VisualStudioSolution sln, GitRepositoryName 
             //
             // Put it in the dependency's solution folder
             //
-            sln.AddNestedProject(project.Id, dependencyFolderId);
+            sln.AddNestedProject(project.Id, folder.Id);
 
             //
             // Add solution -> project configuration mappings
@@ -143,20 +150,23 @@ FindDependencyProjects(NuGitRepository repository, VisualStudioSolution sln)
 }
 
 
-static void
-DeleteNugitSolutionFolders(VisualStudioSolution sln)
+static bool
+IsNuGitFolder(string name)
 {
-    using (LogicalOperation.Start("Deleting nugit-controlled solution folders"))
-    {
-        for (;;)
-        {
-            var folder =
-                sln.SolutionFolders
-                    .FirstOrDefault(f => f.Name.StartsWith(NugitFolderPrefix, StringComparison.Ordinal));
-            if (folder == null) break;
+    Guard.NotNull(name, nameof(name));
+    return name.StartsWith(NuGitFolderPrefix, StringComparison.Ordinal);
+}
 
-            sln.DeleteSolutionFolder(folder);
-        }
+
+static void
+DeleteNuGitFolders(VisualStudioSolution sln)
+{
+    Guard.NotNull(sln, nameof(sln));
+    while (true)
+    {
+        var folder = sln.SolutionFolders.FirstOrDefault(f => IsNuGitFolder(f.Name));
+        if (folder == null) break;
+        sln.DeleteSolutionFolder(folder);
     }
 }
 
@@ -164,7 +174,8 @@ DeleteNugitSolutionFolders(VisualStudioSolution sln)
 static string[]
 SplitPath(string path)
 {
-    if (path == null) throw new ArgumentNullException("path");
+    Guard.NotNull(path, nameof(path));
+
     return path.Split(
         new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar },
         StringSplitOptions.RemoveEmptyEntries);
@@ -193,7 +204,7 @@ GetLocalPath(string ancestorPath, string descendantPath)
     Guard.NotNull(descendantPath, nameof(descendantPath));
 
     if (!PathContains(ancestorPath, descendantPath))
-        throw new ArgumentException("Not an descendant of ancestorPath", nameof(descendantPath));
+        throw new ArgumentException("Not a descendant of ancestorPath", nameof(descendantPath));
 
     return Path.Combine(SplitPath(descendantPath).Skip(SplitPath(ancestorPath).Length).ToArray());
 }
