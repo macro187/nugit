@@ -1,7 +1,7 @@
 nugit
 =====
 
-A Git-based dependency manager
+A Git dependency manager
 
 
 Description
