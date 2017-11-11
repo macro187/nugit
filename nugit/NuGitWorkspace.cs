@@ -101,7 +101,7 @@ FindRepository(GitRepositoryName name)
     if (name == null) throw new ArgumentNullException("name");
     if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Blank", "name");
 
-    if (!NuGitRepository.IsRepository(Path.Combine(RootPath, name))) return null;
+    if (!GitRepository.IsRepository(Path.Combine(RootPath, name))) return null;
     return new NuGitRepository(this, name);
 }
 
@@ -119,7 +119,7 @@ GetRepositories()
 {
     return
         Directory.EnumerateDirectories(RootPath)
-            .Where(path => NuGitRepository.IsRepository(path))
+            .Where(path => GitRepository.IsRepository(path))
             .Select(path => new GitRepositoryName(Path.GetFileName(path)))
             .Select(name => new NuGitRepository(this, name));
 }

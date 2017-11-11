@@ -31,7 +31,6 @@ NuGitRepository(NuGitWorkspace workspace, GitRepositoryName name)
             Guard.NotNull(name, nameof(name))))
 {
     Workspace = workspace;
-    Name = name;
 }
 
 
@@ -41,17 +40,6 @@ NuGitRepository(NuGitWorkspace workspace, GitRepositoryName name)
 ///
 public NuGitWorkspace
 Workspace
-{
-    get;
-}
-
-
-/// <summary>
-/// Name of the repository subdirectory
-/// </summary>
-///
-public GitRepositoryName
-Name
 {
     get;
 }
