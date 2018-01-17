@@ -5,7 +5,7 @@ using MacroSystem;
 using MacroGuards;
 using MacroDiagnostics;
 using MacroGit;
-
+using System.Linq;
 
 namespace
 nugit
@@ -196,67 +196,66 @@ Traverse(
     Guard.NotNull(visited, nameof(visited));
     Guard.NotNull(onVisited, nameof(onVisited));
 
+    var unvisited = dependencies.Where(d => !visited.Contains(d.Url.RepositoryName)).ToList().AsReadOnly();
+
     //
-    // Clone dependencies that aren't present
+    // Clone any dependency repos that aren't present
     //
-    foreach (var d in dependencies)
+    foreach (var d in unvisited)
     {
         if (workspace.FindRepository(d.Url.RepositoryName) != null) continue;
         Clone(workspace.RootPath, d.Url);
     }
 
     //
-    // Check out dependencies to specified commits
+    // Visit each dependency
     //
     foreach (var d in dependencies)
     {
         var name = d.Url.RepositoryName;
+        var repo = workspace.GetRepository(name);
         var commit = d.CommitName;
+        checkedOut.TryGetValue(name, out var checkedOutCommit);
 
         //
-        // Avoid checking out repositories more than once, but warn on subsequent attempts if the commit
-        // doesn't match
+        // First visit wins
         //
-        GitCommitName checkedOutCommit;
-        if (checkedOut.TryGetValue(name, out checkedOutCommit))
+        if (checkedOutCommit == null)
         {
-            if (commit != checkedOutCommit)
-            {
-                Trace.TraceWarning(
-                    StringExtensions.FormatInvariant(
-                        "{0} depends on {1}#{2} but #{3} has already been checked out",
-                        requiredBy.Name,
-                        name,
-                        commit,
-                        checkedOutCommit));
-            }
+            CheckOut(repo, commit);
+            checkedOut.Add(name, commit);
+            visited.Add(name);
+            onVisited(d, repo);
             continue;
         }
 
-        CheckOut(workspace.GetRepository(name), commit);
-        checkedOut.Add(name, commit);
-    }
+        //
+        // Subsequent visits specifying different commits get a warning
+        //
+        if (commit != checkedOutCommit)
+        {
+            Trace.TraceWarning(
+                StringExtensions.FormatInvariant(
+                    "{0} depends on {1}#{2} but #{3} has already been checked out",
+                    requiredBy.Name,
+                    name,
+                    commit,
+                    checkedOutCommit));
+            continue;
+        }
 
-    //
-    // onVisited
-    //
-    foreach (var d in dependencies)
-    {
-        var name = d.Url.RepositoryName;
-        if (visited.Contains(name)) continue;
-        onVisited(d, workspace.GetRepository(name));
+        //
+        // Subsequent visits specifying the same commit do nothing
+        //
     }
 
     //
     // Recurse
     //
-    foreach (var d in dependencies)
+    foreach (var d in unvisited)
     {
         var name = d.Url.RepositoryName;
         var repo = workspace.FindRepository(name);
-        if (visited.Contains(name)) continue;
-
-        visited.Add(name);
 
         Traverse(
             workspace,
