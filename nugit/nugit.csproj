@@ -1,149 +1,19 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{DFD84E86-A829-4293-8077-A45F1A580C1C}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>nugit</RootNamespace>
-    <AssemblyName>nugit</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <TargetFrameworkProfile />
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworks>netcoreapp2.0;net461</TargetFrameworks>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <LangVersion>default</LangVersion>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
+    <ProjectReference Include="..\..\MacroConsole\MacroConsole\MacroConsole.csproj" />
+    <ProjectReference Include="..\..\MacroDiagnostics\MacroDiagnostics\MacroDiagnostics.csproj" />
+    <ProjectReference Include="..\..\MacroExceptions\MacroExceptions\MacroExceptions.csproj" />
+    <ProjectReference Include="..\..\MacroGit\MacroGit\MacroGit.csproj" />
+    <ProjectReference Include="..\..\MacroGuards\MacroGuards\MacroGuards.csproj" />
+    <ProjectReference Include="..\..\MacroIO\MacroIO\MacroIO.csproj" />
+    <ProjectReference Include="..\..\MacroSln\MacroSln\MacroSln.csproj" />
+    <ProjectReference Include="..\..\MacroSystem\MacroSystem\MacroSystem.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\AssemblyInfoShared.cs">
-      <Link>AssemblyInfoShared.cs</Link>
-    </Compile>
-    <Compile Include="..\GlobalSuppressionsShared.cs">
-      <Link>GlobalSuppressionsShared.cs</Link>
-    </Compile>
-    <Compile Include="DotNuGit.cs" />
-    <Compile Include="DotNuGitParser.cs" />
-    <Compile Include="Dependency.cs" />
-    <Compile Include="DependencyTraverser.cs" />
-    <Compile Include="DependencyUrl.cs" />
-    <Compile Include="Installer.cs" />
-    <Compile Include="LockDependency.cs" />
-    <Compile Include="NuGitRepository.cs" />
-    <Compile Include="NuGitWorkspace.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
-      <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.4.5">
-      <Visible>False</Visible>
-      <ProductName>Windows Installer 4.5</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="..\readme.md">
-      <Link>readme.md</Link>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\macro-sharp-console\MacroConsole\MacroConsole.csproj">
-      <Project>{d6b3952f-d41f-4ce8-9173-448d01e7bb08}</Project>
-      <Name>MacroConsole</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\macro-sharp-git\MacroGit\MacroGit.csproj">
-      <Project>{2852b710-2752-4f72-963c-46d92f6c5c2e}</Project>
-      <Name>MacroGit</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\macro-sharp-sln\MacroSln\MacroSln.csproj">
-      <Project>{db791e76-82a9-449a-8e3d-aa433a664ad8}</Project>
-      <Name>MacroSln</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\macro-sharp\MacroDiagnostics\MacroDiagnostics.csproj">
-      <Project>{650a86c2-c971-48de-8df1-13970bc9d3c2}</Project>
-      <Name>MacroDiagnostics</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\macro-sharp\MacroExceptions\MacroExceptions.csproj">
-      <Project>{25b573fb-1fb2-4bae-a118-b633d31cf991}</Project>
-      <Name>MacroExceptions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\macro-sharp\MacroGuards\MacroGuards.csproj">
-      <Project>{0049d988-2426-45b0-8fda-eab78622d887}</Project>
-      <Name>MacroGuards</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\macro-sharp\MacroIO\MacroIO.csproj">
-      <Project>{3515e94d-d914-40e3-b0b4-16ddd2bd477f}</Project>
-      <Name>MacroIO</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\macro-sharp\MacroSystem\MacroSystem.csproj">
-      <Project>{4b9b553a-b600-4dae-ac79-1d0cb0b35584}</Project>
-      <Name>MacroSystem</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <CodeAnalysisDictionary Include="..\CodeAnalysisDictionaryShared.xml">
-      <Link>CodeAnalysisDictionaryShared.xml</Link>
-    </CodeAnalysisDictionary>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

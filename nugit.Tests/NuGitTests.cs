@@ -13,35 +13,45 @@ namespace nugit.Tests
     public class NuGitTests
     {
 
-        static string here = Path.GetFullPath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+        #if NET461
+        const string frameworkMoniker = "net461";
+        #elif NETCOREAPP2_0
+        const string frameworkMoniker = "netcoreapp2.0";
+        #else
+        #error Unrecognised build framework
+        #endif
+
+        static readonly string here = Path.GetFullPath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
 
         //
         // Source Git repos
         //
-        static string srcroot = Path.Combine(here, "src");
-        static string srcDirA = Path.Combine(srcroot, "a");
-        static string srcDirB = Path.Combine(srcroot, "b");
-        static string srcDirC = Path.Combine(srcroot, "c");
-        static GitUrl srcUrlA = new GitUrl(Path.Combine("file://" + srcDirA));
-        static GitUrl srcUrlB = new GitUrl(Path.Combine("file://" + srcDirB));
-        static GitUrl srcUrlC = new GitUrl(Path.Combine("file://" + srcDirC));
+        static readonly string srcroot = Path.Combine(here, "src");
+        static readonly string srcDirA = Path.Combine(srcroot, "a");
+        static readonly string srcDirB = Path.Combine(srcroot, "b");
+        static readonly string srcDirC = Path.Combine(srcroot, "c");
+        static readonly GitUrl srcUrlA = new GitUrl(Path.Combine("file://" + srcDirA));
+        static readonly GitUrl srcUrlB = new GitUrl(Path.Combine("file://" + srcDirB));
+        static readonly GitUrl srcUrlC = new GitUrl(Path.Combine("file://" + srcDirC));
 
         //
         // Workspace Git repos
         //
-        static string wrkroot = Path.Combine(here, "wrk");
-        static string wrkDirA = Path.Combine(wrkroot, "a");
-        static string wrkDirB = Path.Combine(wrkroot, "b");
-        static string wrkDirC = Path.Combine(wrkroot, "c");
+        static readonly string wrkroot = Path.Combine(here, "wrk");
+        static readonly string wrkDirA = Path.Combine(wrkroot, "a");
+        static readonly string wrkDirB = Path.Combine(wrkroot, "b");
+        static readonly string wrkDirC = Path.Combine(wrkroot, "c");
         static GitRepository wrkRepoA;
 
         //
         // nugit.exe under test
         //
-        static string nugitPath = Path.GetFullPath(Path.Combine(
+        static readonly string nugitPath = Path.GetFullPath(Path.Combine(
             here,
-            "..", "..", "..",
-            "nugit", "bin", "Debug", "nugit.exe"));
+            "..", "..", "..", "..",
+            "nugit", "bin", "Debug",
+            frameworkMoniker,
+            "nugit.exe"));
 
 
         /// <summary>
