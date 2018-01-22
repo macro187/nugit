@@ -43,6 +43,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nugit-MacroCollections", "n
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MacroCollections", "..\MacroCollections\MacroCollections\MacroCollections.csproj", "{A28ABFA7-7C10-4BAB-B75C-1304F3FB5656}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9DD2F44E-ACDE-46AA-A81C-05CAF71732F5}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		.nugit = .nugit
+		.produce = .produce
+		license.txt = license.txt
+		readme.md = readme.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
