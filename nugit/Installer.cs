@@ -132,7 +132,7 @@ Install(
 }
 
 
-static List<VisualStudioProjectReference>
+static List<VisualStudioSolutionProjectReference>
 FindDependencyProjects(NuGitRepository repository, VisualStudioSolution sln)
 {
     var slnDir = Path.GetDirectoryName(sln.Path);
@@ -144,7 +144,6 @@ FindDependencyProjects(NuGitRepository repository, VisualStudioSolution sln)
         .Where(p => !string.IsNullOrWhiteSpace(p.Location))
         .Where(p => !Path.IsPathRooted(p.Location))
         .Where(p => PathContains(repository.Path, Path.GetFullPath(Path.Combine(slnDir, p.Location))))
-        .Where(p => !p.GetProject().ProjectTypeGuids.Contains(VisualStudioProjectTypeIds.Test))
         .OrderBy(p => p.Name)
         .ToList();
 }
