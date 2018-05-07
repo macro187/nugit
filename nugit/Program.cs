@@ -123,16 +123,10 @@ static void
 Banner()
 {
     var name = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductName;
-    var description = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileDescription;
-    var major = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductMajorPart;
-    var minor = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductMinorPart;
-    var copyright = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).LegalCopyright;
-    var authors = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).CompanyName;
+    var version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
     Trace.TraceInformation("");
     Trace.TraceInformation("==============================");
-    Trace.TraceInformation("{0} v{1}.{2}", name, major, minor);
-    Trace.TraceInformation(description);
-    Trace.TraceInformation("{0} {1}", copyright, authors);
+    Trace.TraceInformation("{0} {1}", name, version);
     Trace.TraceInformation("==============================");
     Trace.TraceInformation("");
 }
