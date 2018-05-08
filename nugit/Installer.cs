@@ -7,6 +7,7 @@ using MacroGuards;
 using MacroDiagnostics;
 using MacroExceptions;
 using MacroGit;
+using MacroIO;
 using MacroSln;
 
 
@@ -71,9 +72,9 @@ Install(
 {
     var workspace = repository.Workspace;
 
-    var slnLocalPath = GetLocalPath(repository.Path, Path.GetDirectoryName(sln.Path));
-    var slnLocalPathComponents = SplitPath(slnLocalPath);
-    var slnToWorkspacePath = Path.Combine(Enumerable.Repeat("..", slnLocalPathComponents.Length + 1).ToArray());
+    var slnLocalPath = PathExtensions.GetPathFromAncestor(sln.Path, repository.Path);
+    var slnLocalPathComponents = PathExtensions.Split(slnLocalPath);
+    var slnToWorkspacePath = Path.Combine(Enumerable.Repeat("..", slnLocalPathComponents.Length).ToArray());
 
     var dependencyRepository = workspace.GetRepository(dependencyName);
 
@@ -100,8 +101,8 @@ Install(
 
         foreach (var project in dependencyProjects)
         {
-            var projectPath = Path.GetFullPath(Path.Combine(dependencySlnDir, project.Location));
-            var projectLocalPath = GetLocalPath(dependencyRepository.Path, projectPath);
+            var projectLocalPath =
+                PathExtensions.GetPathFromAncestor(project.AbsoluteLocation, dependencyRepository.Path);
 
             Trace.TraceInformation("Installing " + projectLocalPath);
 
@@ -135,17 +136,28 @@ Install(
 static List<VisualStudioSolutionProjectReference>
 FindDependencyProjects(NuGitRepository repository, VisualStudioSolution sln)
 {
-    var slnDir = Path.GetDirectoryName(sln.Path);
-    return sln.ProjectReferences
-        .Where(p => !p.Name.EndsWith(".Tests", StringComparison.OrdinalIgnoreCase))
-        .Where(p => !(p.Name.IndexOf(".Tests.", StringComparison.OrdinalIgnoreCase) > -1))
-        .Where(p => !string.IsNullOrWhiteSpace(p.TypeId))
-        .Where(p => !(p.TypeId == VisualStudioProjectTypeIds.SolutionFolder))
-        .Where(p => !string.IsNullOrWhiteSpace(p.Location))
-        .Where(p => !Path.IsPathRooted(p.Location))
-        .Where(p => PathContains(repository.Path, Path.GetFullPath(Path.Combine(slnDir, p.Location))))
-        .OrderBy(p => p.Name)
-        .ToList();
+    Guard.NotNull(repository, nameof(repository));
+    Guard.NotNull(sln, nameof(sln));
+    return
+        sln.ProjectReferences
+            .Where(p =>
+                p.TypeId == VisualStudioProjectTypeIds.CSharp ||
+                p.TypeId == VisualStudioProjectTypeIds.CSharpNew)
+            .Where(p => !IsTestProject(p))
+            .Where(p => !string.IsNullOrWhiteSpace(p.Location))
+            .Where(p => PathExtensions.IsDescendantOf(p.AbsoluteLocation, repository.Path))
+            .OrderBy(p => p.Name)
+            .ToList();
+}
+
+
+static bool
+IsTestProject(VisualStudioSolutionProjectReference project)
+{
+    Guard.NotNull(project, nameof(project));
+    return
+        project.Name.IndexOf(".Tests.", StringComparison.OrdinalIgnoreCase) > -1 ||
+        project.Name.EndsWith(".Tests", StringComparison.OrdinalIgnoreCase);
 }
 
 
@@ -167,45 +179,6 @@ DeleteNuGitFolders(VisualStudioSolution sln)
         if (folder == null) break;
         sln.DeleteSolutionFolder(folder);
     }
-}
-
-
-static string[]
-SplitPath(string path)
-{
-    Guard.NotNull(path, nameof(path));
-
-    return path.Split(
-        new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar },
-        StringSplitOptions.RemoveEmptyEntries);
-}
-
-
-static bool
-PathContains(string ancestorPath, string descendantPath)
-{
-    Guard.NotNull(ancestorPath, nameof(ancestorPath));
-    Guard.NotNull(descendantPath, nameof(descendantPath));
-
-    var ancestorComponents = SplitPath(ancestorPath);
-    var descendantComponents = SplitPath(descendantPath);
-
-    return ancestorComponents.SequenceEqual(
-        descendantComponents.Take(ancestorComponents.Length),
-        StringComparer.Ordinal);
-}
-
-
-static string
-GetLocalPath(string ancestorPath, string descendantPath)
-{
-    Guard.NotNull(ancestorPath, nameof(ancestorPath));
-    Guard.NotNull(descendantPath, nameof(descendantPath));
-
-    if (!PathContains(ancestorPath, descendantPath))
-        throw new ArgumentException("Not a descendant of ancestorPath", nameof(descendantPath));
-
-    return Path.Combine(SplitPath(descendantPath).Skip(SplitPath(ancestorPath).Length).ToArray());
 }
 
 
