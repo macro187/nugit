@@ -7,6 +7,7 @@ using MacroGuards;
 using MacroExceptions;
 using MacroGit;
 using MacroSln;
+using MacroIO;
 
 namespace
 nugit
@@ -165,7 +166,7 @@ WriteNuGitLock(ICollection<LockDependency> dependencies)
         return;
     }
 
-    File.WriteAllLines(
+    FileExtensions.RewriteAllLines(
         path,
         dependencies.Select(d =>
             string.Concat(
