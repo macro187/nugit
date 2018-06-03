@@ -7,6 +7,7 @@ using MacroDiagnostics;
 using MacroGit;
 using System.Linq;
 
+
 namespace
 nugit
 {
@@ -45,9 +46,20 @@ GetAllDependencies(NuGitRepository repository)
     using (LogicalOperation.Start("Calculating dependencies"))
     {
         var names = new List<GitRepositoryName>();
-        Traverse(repository, (d,r) => names.Add(r.Name));
+        Traverse(repository, (d,r) => names.Add(r.Name), true);
         return names;
     }
+}
+
+
+/// <summary>
+/// Traverse a repository's dependencies, using frozen dependency information in the lockfile if present
+/// </summary>
+///
+public static void
+Traverse(NuGitRepository repository)
+{
+    Traverse(repository, true);
 }
 
 
@@ -55,10 +67,14 @@ GetAllDependencies(NuGitRepository repository)
 /// Traverse a repository's dependencies
 /// </summary>
 ///
+/// <param name="useLock">
+/// Whether to use frozen dependency information in the lockfile, if present
+/// </param>
+///
 public static void
-Traverse(NuGitRepository repository)
+Traverse(NuGitRepository repository, bool useLock)
 {
-    Traverse(repository, (d,r) => {});
+    Traverse(repository, (d,r) => {}, useLock);
 }
 
 
@@ -76,18 +92,25 @@ Traverse(NuGitRepository repository)
 /// will not
 /// </param>
 ///
+/// <param name="useLock">
+/// Whether to use frozen dependency information in the lockfile, if present
+/// </param>
+///
 public static void
-Traverse(NuGitRepository repository, Action<Dependency,NuGitRepository> onVisited)
+Traverse(NuGitRepository repository, Action<Dependency,NuGitRepository> onVisited, bool useLock)
 {
     if (repository == null) throw new ArgumentNullException("repository");
 
     IList<LockDependency> lockDependencies;
 
-    lockDependencies = repository.ReadNuGitLock();
-    if (lockDependencies.Count > 0)
+    if (useLock)
     {
-        TraverseLock(repository, lockDependencies, onVisited);
-        return;
+        lockDependencies = repository.ReadNuGitLock();
+        if (lockDependencies != null)
+        {
+            TraverseLock(repository, lockDependencies, onVisited);
+            return;
+        }
     }
 
     lockDependencies = new List<LockDependency>();

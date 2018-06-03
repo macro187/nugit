@@ -198,8 +198,7 @@ Update(Queue<string> args)
     var repository = WhereAmI();
     if (repository == null) throw new UserException("Not in a repository");
 
-    repository.DeleteNuGitLock();
-    DependencyTraverser.Traverse(repository);
+    DependencyTraverser.Traverse(repository, false);
 
     return 0;
 }

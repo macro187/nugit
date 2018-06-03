@@ -75,12 +75,19 @@ ReadDotNuGit()
 /// Read dependency information from .nugit.lock
 /// </summary>
 ///
+/// <returns>
+/// The dependencies listed in .nugit.lock
+/// - OR -
+/// <c>null</c> if .nugit.lock doesn't exist
+/// </returns>
+///
 public IList<LockDependency>
 ReadNuGitLock()
 {
     string dotNugitDir = GetDotNugitDir();
     string path = IOPath.Combine(dotNugitDir, ".nugit.lock");
-    if (!File.Exists(path)) return new LockDependency[0];
+
+    if (!File.Exists(path)) return null;
 
     var result = new List<LockDependency>();
     int lineNumber = 0;
@@ -175,20 +182,6 @@ WriteNuGitLock(ICollection<LockDependency> dependencies)
                 d.CommitName,
                 " ",
                 d.CommitId)));
-}
-
-
-/// <summary>
-/// Delete .nugit.lock
-/// </summary>
-///
-public void
-DeleteNuGitLock()
-{
-    string dotNugitDir = GetDotNugitDir();
-    string path = IOPath.Combine(dotNugitDir, ".nugit.lock");
-    if (!File.Exists(path)) return;
-    File.Delete(path);
 }
 
 
