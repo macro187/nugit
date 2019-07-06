@@ -1,2 +1,2 @@
-program: nugit\bin\Debug\net461\publish\nugit.exe
+program: nugit\bin\Debug\netcoreapp2.0\publish\nugit.dll
 
