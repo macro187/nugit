@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using IOPath = System.IO.Path;
 using System.Collections.Generic;
