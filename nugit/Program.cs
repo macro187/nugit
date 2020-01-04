@@ -177,11 +177,25 @@ Help(Queue<string> args)
 static int
 Restore(Queue<string> args)
 {
-    if (args.Any()) throw new UserException("Too many arguments");
+    var exact = false;
+
+    while (args.Any())
+    {
+        var arg = args.Dequeue();
+        switch (arg)
+        {
+            case "--exact":
+                exact = true;
+                break;
+            default:
+                throw new UserException($"Unexpected argument '{arg}'");
+        }
+    }
+
     var repository = WhereAmI();
     if (repository == null) throw new UserException("Not in a repository");
 
-    DependencyTraverser.Traverse(repository);
+    DependencyTraverser.Traverse(repository, !exact);
 
     return 0;
 }
@@ -198,7 +212,7 @@ Update(Queue<string> args)
     var repository = WhereAmI();
     if (repository == null) throw new UserException("Not in a repository");
 
-    DependencyTraverser.Traverse(repository, false);
+    DependencyTraverser.Traverse(repository, false, false);
 
     return 0;
 }

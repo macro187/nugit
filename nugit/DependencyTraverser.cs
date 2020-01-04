@@ -6,7 +6,7 @@ using MacroGuards;
 using MacroDiagnostics;
 using MacroGit;
 using System.Linq;
-
+using MacroExceptions;
 
 namespace
 nugit
@@ -40,13 +40,18 @@ DependencyTraverser
 /// Get a list of a repository's full dependency graph in breadth-first order
 /// </summary>
 ///
+/// <param name="isLoose">
+/// If using frozen dependency information from a lockfile, whether to accept dependencies that are already checked out
+/// to the frozen version OR NEWER
+/// </param>
+///
 public static IList<GitRepositoryName>
-GetAllDependencies(NuGitRepository repository)
+GetAllDependencies(NuGitRepository repository, bool isLoose)
 {
     using (LogicalOperation.Start("Calculating dependencies"))
     {
         var names = new List<GitRepositoryName>();
-        Traverse(repository, (d,r) => names.Add(r.Name), true);
+        Traverse(repository, (d,r) => names.Add(r.Name), true, isLoose);
         return names;
     }
 }
@@ -56,10 +61,15 @@ GetAllDependencies(NuGitRepository repository)
 /// Traverse a repository's dependencies, using frozen dependency information in the lockfile if present
 /// </summary>
 ///
+/// <param name="isLoose">
+/// If using frozen dependency information from a lockfile, whether to accept dependencies that are already checked out
+/// to the frozen version OR NEWER
+/// </param>
+///
 public static void
-Traverse(NuGitRepository repository)
+Traverse(NuGitRepository repository, bool isLoose)
 {
-    Traverse(repository, true);
+    Traverse(repository, true, isLoose);
 }
 
 
@@ -71,10 +81,15 @@ Traverse(NuGitRepository repository)
 /// Whether to use frozen dependency information in the lockfile, if present
 /// </param>
 ///
+/// <param name="isLoose">
+/// If using frozen dependency information from a lockfile, whether to accept dependencies that are already checked out
+/// to the frozen version OR NEWER
+/// </param>
+///
 public static void
-Traverse(NuGitRepository repository, bool useLock)
+Traverse(NuGitRepository repository, bool useLock, bool isLoose)
 {
-    Traverse(repository, (d,r) => {}, useLock);
+    Traverse(repository, (d,r) => {}, useLock, isLoose);
 }
 
 
@@ -96,8 +111,13 @@ Traverse(NuGitRepository repository, bool useLock)
 /// Whether to use frozen dependency information in the lockfile, if present
 /// </param>
 ///
+/// <param name="isLoose">
+/// If using frozen dependency information from a lockfile, whether to accept dependencies that are already checked out
+/// to the frozen version OR NEWER
+/// </param>
+///
 public static void
-Traverse(NuGitRepository repository, Action<Dependency,NuGitRepository> onVisited, bool useLock)
+Traverse(NuGitRepository repository, Action<Dependency,NuGitRepository> onVisited, bool useLock, bool isLoose)
 {
     if (repository == null) throw new ArgumentNullException("repository");
 
@@ -108,7 +128,7 @@ Traverse(NuGitRepository repository, Action<Dependency,NuGitRepository> onVisite
         lockDependencies = repository.ReadNuGitLock();
         if (lockDependencies != null)
         {
-            TraverseLock(repository, lockDependencies, onVisited);
+            TraverseLock(repository, lockDependencies, onVisited, isLoose);
             return;
         }
     }
@@ -135,21 +155,56 @@ static void
 TraverseLock(
     NuGitRepository repository,
     IList<LockDependency> lockDependencies,
-    Action<Dependency,NuGitRepository> onVisited
+    Action<Dependency,NuGitRepository> onVisited,
+    bool isLoose
 )
 {
     var workspace = repository.Workspace;
 
     foreach (var d in lockDependencies)
+    using (LogicalOperation.Start($"Restoring {d.Url.RepositoryName} to {d.CommitName} ({d.CommitId})"))
     {
         var name = d.Url.RepositoryName;
+
         var r = workspace.FindRepository(name);
         if (r == null)
         {
             Clone(workspace.RootPath, d.Url);
             r = workspace.GetRepository(name);
         }
-        if (r.GetCommitId(d.CommitName) == d.CommitId)
+
+        var head = r.GetCommitId(new GitCommitName("HEAD"));
+        var isCheckedOutToExact = head == d.CommitId;
+        var isCheckedOutToDescendent = r.IsAncestor(d.CommitId, head);
+        var hasUncommittedChanges = r.HasUncommittedChanges();
+        var isCommitNameAtCommitId = r.GetCommitId(d.CommitName) == d.CommitId;
+
+        if (isLoose && isCheckedOutToExact && hasUncommittedChanges)
+        {
+            Trace.TraceInformation($"Already checked out with uncommitted changes");
+        }
+        else if (isLoose && isCheckedOutToExact)
+        {
+            Trace.TraceInformation($"Already checked out");
+        }
+        else if (isLoose && isCheckedOutToDescendent && hasUncommittedChanges)
+        {
+            Trace.TraceInformation($"Already checked out to descendent with uncommitted changes");
+        }
+        else if (isLoose && isCheckedOutToDescendent)
+        {
+            Trace.TraceInformation($"Already checked out to descendent");
+        }
+        else if (r.HasUncommittedChanges())
+        {
+            Trace.TraceError("Uncommitted changes");
+            throw new UserException($"Uncommitted changes in {name}");
+        }
+        else if (isCheckedOutToExact)
+        {
+            Trace.TraceInformation($"Already checked out");
+        }
+        else if (isCommitNameAtCommitId)
         {
             CheckOut(r, d.CommitName);
         }
@@ -157,6 +212,7 @@ TraverseLock(
         {
             CheckOut(r, d.CommitId);
         }
+
         onVisited(d, r);
     }
 }
@@ -294,7 +350,7 @@ Traverse(
 static void
 Clone(string parentPath, GitUrl url)
 {
-    using (LogicalOperation.Start("Cloning " + url.RepositoryName))
+    using (LogicalOperation.Start($"Cloning {url}"))
     {
         GitRepository.Clone(parentPath, url);
     }
@@ -304,7 +360,7 @@ Clone(string parentPath, GitUrl url)
 static void
 CheckOut(NuGitRepository repository, GitCommitName commit)
 {
-    using (LogicalOperation.Start("Checking out " + repository.Name + " to " + commit))
+    using (LogicalOperation.Start($"Checking out {commit}"))
     {
         repository.Checkout(commit);
     }

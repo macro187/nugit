@@ -4,6 +4,7 @@ nugit
 A Git dependency manager
 
 
+
 Description
 ===========
 
@@ -15,10 +16,12 @@ nugit is controlled by plain-text `.nugit` files located in the root
 directories of Git repositories.
 
 
+
 Requirements
 ============
 
 Microsoft .NET Framework v4.0 or newer.
+
 
 
 Features
@@ -80,6 +83,7 @@ Your nugit-specific solution and projects can use NuGit-style dependencies
 (and be used as such) and the rest of your repository remains unchanged.
 
 
+
 Synopsis
 ========
 
@@ -92,30 +96,49 @@ Synopsis
             Command-specific options and arguments
 
 
+
 Commands
 ========
 
-    help
-        Display command line usage information
+    restore [--exact]
+        Restore dependencies
+
+        Restore the sequence of Git repositories recorded in .nugit.lock to the
+        specified commits.  Repositories are cloned as necessary and checked out
+        to the recorded commits.  Repositories already present and checked out
+        to the recorded commits OR NEWER are left as-is to allow dependencies to
+        evolve in parallel during development.  Use the --exact switch to always
+        check out the exact recorded versions of dependencies.
+
+        If .nugit.lock is not present, this command behaves like the update
+        command.
+
+        --exact
+            When using dependency information from .nugit.lock, always check out
+            the exact recorded versions of dependencies.
+
+            This is desirable on build servers, when building releases, or in
+            any other situation where the exact recorded dependency graph is
+            desired.
 
     update
-        Restore dependencies listed in .nugit
+        Update dependencies
 
-        Recursively clone and/or checkout repositories and commits listed
-        in .nugit, recording the exact sequence and commit identifiers in
-        .nugit.lock
+        Recursively restore the Git repositories recorded in .nugit to the
+        specified versions.  Repositories are cloned as necessary and checked
+        out to the recorded versions (or master if not specified).  The sequence
+        of repositories and exact commit identifiers is recorded in .nugit.lock
+        so future restore commands can recreate the exact same graph of
+        dependencies regardless of changes that may have occurred.
 
-    restore
-        Restore dependencies listed in .nugit.lock or .nugit
-
-        If .nugit.lock is present, clone and/or checkout the exact repositories
-        and commits recorded in it
-
-        If .nugit.lock is not present, same as the update command
+    install
+        Include Visual Studio projects from all required repositories in the
+        current repository's Visual Studio solution, organised into folders by
+        repository name
 
     clone <url> [<version>]
-        Clone a repository into the current workspace and restore its required
-        repositories as per the restore command
+        Clone a repository into the current workspace and restore its
+        dependencies per the update command
 
         <url>
             URL of the Git repository to clone
@@ -123,10 +146,9 @@ Commands
         <version>
             Git revision to use (default master)
 
-    install
-        Install Visual Studio projects from all required repositories into the
-        current repository's Visual Studio solution, organised into solution
-        folders by repository name
+    help
+        Display command line usage information
+
 
 
 File Format
@@ -144,10 +166,12 @@ hash characters are ignored.
     https://example.com/example4.git#2482911091ab7219ba544aeb6969f07904a2d1b0
 
 
+
 License
 =======
 
 [MIT License](https://github.com/macro187/nugit/blob/master/license.txt)
+
 
 
 Copyright
@@ -155,6 +179,7 @@ Copyright
 
 Copyright (c) 2016-2017  
 Ron MacNeil \<<https://github.com/macro187>\>  
+
 
 
 Continuous Integration

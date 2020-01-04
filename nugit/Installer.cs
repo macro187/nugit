@@ -41,7 +41,7 @@ Install(NuGitRepository repository)
     var sln = repository.FindVisualStudioSolution();
     if (sln == null) throw new UserException("No Visual Studio solution found in repo");
 
-    var repoNames = DependencyTraverser.GetAllDependencies(repository);
+    var repoNames = DependencyTraverser.GetAllDependencies(repository, false);
 
     var oldFolderIds =
         sln.SolutionFolders
