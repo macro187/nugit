@@ -104,8 +104,6 @@ Main2(Queue<string> args)
             return Restore(args);
         case "UPDATE":
             return Update(args);
-        case "CLONE":
-            return Clone(args);
         case "INSTALL":
             return Install(args);
         default:
@@ -213,30 +211,6 @@ Update(Queue<string> args)
     if (repository == null) throw new UserException("Not in a repository");
 
     DependencyTraverser.Traverse(repository, false, false);
-
-    return 0;
-}
-
-
-/// <summary>
-/// The <c>clone</c> command
-/// </summary>
-///
-static int
-Clone(Queue<string> args)
-{
-    if (!args.Any()) throw new UserException("Expected <url>");
-    var url = new GitUrl(args.Dequeue());
-    var version = new GitCommitName(args.Any() ? args.Dequeue() : "master");
-    if (args.Any()) throw new UserException("Too many arguments");
-
-    var repository = WhereAmI();
-    var workspace =
-        repository != null
-            ? repository.Workspace
-            : new NuGitWorkspace(Environment.CurrentDirectory);
-
-    DependencyTraverser.Traverse(workspace, new Dependency[] { new Dependency(url, version) });
 
     return 0;
 }

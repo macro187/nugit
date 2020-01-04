@@ -136,16 +136,6 @@ Commands
         current repository's Visual Studio solution, organised into folders by
         repository name
 
-    clone <url> [<version>]
-        Clone a repository into the current workspace and restore its
-        dependencies per the update command
-
-        <url>
-            URL of the Git repository to clone
-
-        <version>
-            Git revision to use (default master)
-
     help
         Display command line usage information
 
