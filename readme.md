@@ -100,36 +100,30 @@ Synopsis
 Commands
 ========
 
+    update
+        Update dependencies
+
+        Recursively restore the Git repositories recorded in .nugit to the
+        specified versions.  Repositories are cloned as necessary and checked
+        out to the recorded versions.  The sequence of repositories and exact
+        commit identifiers is recorded in .nugit.lock so future restore commands
+        can recreate the exact same dependencies regardless of changes that may
+        have occurred.
+
     restore [--exact]
         Restore dependencies
 
         Restore the sequence of Git repositories recorded in .nugit.lock to the
         specified commits.  Repositories are cloned as necessary and checked out
         to the recorded commits.  Repositories already present and checked out
-        to the recorded commits OR NEWER are left as-is to allow dependencies to
-        evolve in parallel during development.  Use the --exact switch to always
-        check out the exact recorded versions of dependencies.
-
-        If .nugit.lock is not present, this command behaves like the update
-        command.
+        to the recorded commits OR NEWER are left as-is to allow them to evolve
+        in parallel during development.
 
         --exact
-            When using dependency information from .nugit.lock, always check out
-            the exact recorded versions of dependencies.
-
-            This is desirable on build servers, when building releases, or in
-            any other situation where the exact recorded dependency graph is
+            Always check out the exact recorded versions of dependencies. This
+            is desirable on build servers, when building releases, or in any
+            other situation where the exact recorded dependency graph is
             desired.
-
-    update
-        Update dependencies
-
-        Recursively restore the Git repositories recorded in .nugit to the
-        specified versions.  Repositories are cloned as necessary and checked
-        out to the recorded versions (or master if not specified).  The sequence
-        of repositories and exact commit identifiers is recorded in .nugit.lock
-        so future restore commands can recreate the exact same graph of
-        dependencies regardless of changes that may have occurred.
 
     install
         Include Visual Studio projects from all required repositories in the

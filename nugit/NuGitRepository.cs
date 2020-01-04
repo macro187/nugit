@@ -47,17 +47,40 @@ Workspace
 
 
 /// <summary>
+/// Determine whether a .nugit file is present
+/// </summary>
+///
+public bool
+HasDotNuGit()
+{
+    return File.Exists(GetDotNuGitPath());
+}
+
+
+/// <summary>
+/// Determine whether a .nugit.lock file is present
+/// </summary>
+///
+public bool
+HasDotNuGitLock()
+{
+    return File.Exists(GetDotNuGitLockPath());
+}
+
+
+/// <summary>
 /// Read .nugit information
 /// </summary>
 ///
 public DotNuGit
 ReadDotNuGit()
 {
-    string dotNugitDir = GetDotNugitDir();
-    string path = IOPath.Combine(dotNugitDir, ".nugit");
-
-    if (!File.Exists(path))
+    if (!HasDotNuGit())
+    {
         return new DotNuGit();
+    }
+
+    var path = GetDotNuGitPath();
 
     try
     {
@@ -77,21 +100,23 @@ ReadDotNuGit()
 ///
 /// <returns>
 /// The dependencies listed in .nugit.lock
-/// - OR -
-/// <c>null</c> if .nugit.lock doesn't exist
 /// </returns>
 ///
+/// <exception cref="InvalidOperationException">
+/// .nugit.lock not present
+/// </exception>
+///
 public IList<LockDependency>
-ReadNuGitLock()
+ReadDotNuGitLock()
 {
-    string dotNugitDir = GetDotNugitDir();
-    string path = IOPath.Combine(dotNugitDir, ".nugit.lock");
-
-    if (!File.Exists(path)) return null;
+    if (!HasDotNuGitLock())
+    {
+        throw new InvalidOperationException(".nugit.lock not present");
+    }
 
     var result = new List<LockDependency>();
     int lineNumber = 0;
-    foreach (var rawline in File.ReadLines(path))
+    foreach (var rawline in File.ReadLines(GetDotNuGitLockPath()))
     {
         lineNumber++;
         var line = rawline.Trim();
@@ -160,12 +185,11 @@ ReadNuGitLock()
 /// </summary>
 ///
 public void
-WriteNuGitLock(ICollection<LockDependency> dependencies)
+WriteDotNuGitLock(ICollection<LockDependency> dependencies)
 {
     Guard.NotNull(dependencies, nameof(dependencies));
 
-    string dotNugitDir = GetDotNugitDir();
-    string path = IOPath.Combine(dotNugitDir, ".nugit.lock");
+    string path = GetDotNuGitLockPath();
 
     if (dependencies.Count == 0)
     {
@@ -192,16 +216,38 @@ WriteNuGitLock(ICollection<LockDependency> dependencies)
 public VisualStudioSolution
 FindVisualStudioSolution()
 {
-    return VisualStudioSolution.Find(GetDotNugitDir());
+    return VisualStudioSolution.Find(GetDotNuGitDir());
 }
 
 
 /// <summary>
-/// Determine full path to directory that does (or should) contain the .nugit file
+/// Determine full path to .nugit (regardless of whether it actually exists)
 /// </summary>
 ///
 string
-GetDotNugitDir()
+GetDotNuGitPath()
+{
+    return IOPath.Combine(GetDotNuGitDir(), ".nugit");
+}
+
+
+/// <summary>
+/// Determine full path to .nugit.lock (regardless of whether it actually exists)
+/// </summary>
+///
+string
+GetDotNuGitLockPath()
+{
+    return IOPath.Combine(GetDotNuGitDir(), ".nugit.lock");
+}
+
+
+/// <summary>
+/// Determine full path to directory that may contain .nugit and .nugit.lock
+/// </summary>
+///
+string
+GetDotNuGitDir()
 {
     string dotNugitDir = IOPath.Combine(Path, ".nugit");
     if (Directory.Exists(dotNugitDir)) return dotNugitDir;

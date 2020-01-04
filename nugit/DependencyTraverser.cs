@@ -58,22 +58,6 @@ GetAllDependencies(NuGitRepository repository, bool isLoose)
 
 
 /// <summary>
-/// Traverse a repository's dependencies, using frozen dependency information in the lockfile if present
-/// </summary>
-///
-/// <param name="isLoose">
-/// If using frozen dependency information from a lockfile, whether to accept dependencies that are already checked out
-/// to the frozen version OR NEWER
-/// </param>
-///
-public static void
-Traverse(NuGitRepository repository, bool isLoose)
-{
-    Traverse(repository, true, isLoose);
-}
-
-
-/// <summary>
 /// Traverse a repository's dependencies
 /// </summary>
 ///
@@ -123,14 +107,10 @@ Traverse(NuGitRepository repository, Action<Dependency,NuGitRepository> onVisite
 
     IList<LockDependency> lockDependencies;
 
-    if (useLock)
+    if (useLock && repository.HasDotNuGitLock())
     {
-        lockDependencies = repository.ReadNuGitLock();
-        if (lockDependencies != null)
-        {
-            TraverseLock(repository, lockDependencies, onVisited, isLoose);
-            return;
-        }
+        TraverseLock(repository, repository.ReadDotNuGitLock(), onVisited, isLoose);
+        return;
     }
 
     lockDependencies = new List<LockDependency>();
@@ -147,7 +127,16 @@ Traverse(NuGitRepository repository, Action<Dependency,NuGitRepository> onVisite
             }
         );
 
-    repository.WriteNuGitLock(lockDependencies);
+    repository.WriteDotNuGitLock(lockDependencies);
+}
+
+
+public static void
+TraverseLock(NuGitRepository repository, bool isLoose)
+{
+    if (repository == null) throw new ArgumentNullException("repository");
+    var lockDependencies = repository.ReadDotNuGitLock();
+    TraverseLock(repository, lockDependencies, (_,__) => {}, isLoose);
 }
 
 
@@ -215,47 +204,6 @@ TraverseLock(
 
         onVisited(d, r);
     }
-}
-
-
-/// <summary>
-/// Traverse specified dependencies
-/// </summary>
-///
-public static void
-Traverse(NuGitWorkspace workspace, IEnumerable<Dependency> dependencies)
-{
-    Traverse(workspace, dependencies, (d,r) => {});
-}
-
-
-/// <summary>
-/// Traverse specified dependencies, performing an action as each is visited
-/// </summary>
-///
-/// <remarks>
-/// Each dependency is visited exactly once.
-/// </remarks>
-///
-/// <param name="onVisited">
-/// An action to invoke for each repository encountered during the descent through the dependency graph, at
-/// which time the correct version of the repository itself will be available but its transitive dependencies
-/// will not
-/// </param>
-///
-static void
-Traverse(
-    NuGitWorkspace workspace,
-    IEnumerable<Dependency> dependencies,
-    Action<Dependency,NuGitRepository> onVisited)
-{
-    Traverse(
-        workspace,
-        dependencies,
-        null,
-        new Dictionary<GitRepositoryName,GitCommitName>(),
-        new HashSet<GitRepositoryName>(),
-        onVisited);
 }
 
 

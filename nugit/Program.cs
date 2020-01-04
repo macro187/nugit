@@ -176,7 +176,6 @@ static int
 Restore(Queue<string> args)
 {
     var exact = false;
-
     while (args.Any())
     {
         var arg = args.Dequeue();
@@ -193,7 +192,13 @@ Restore(Queue<string> args)
     var repository = WhereAmI();
     if (repository == null) throw new UserException("Not in a repository");
 
-    DependencyTraverser.Traverse(repository, !exact);
+    if (!repository.HasDotNuGitLock())
+    {
+        Trace.TraceError("No .nugit.lock file present, 'nugit update' to create it");
+        throw new UserException("No .nugit.lock file present");
+    }
+
+    DependencyTraverser.TraverseLock(repository, !exact);
 
     return 0;
 }
