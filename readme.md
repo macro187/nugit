@@ -20,7 +20,7 @@ directories of Git repositories.
 Requirements
 ============
 
-Microsoft .NET Framework v4.0 or newer.
+Microsoft .NET Framework v4.0 (or newer) or .NET Core 2.0 (or newer)
 
 
 
