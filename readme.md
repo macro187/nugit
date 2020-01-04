@@ -161,7 +161,7 @@ License
 Copyright
 =========
 
-Copyright (c) 2016-2017  
+Copyright (c) 2016-2020  
 Ron MacNeil \<<https://github.com/macro187>\>  
 
 
