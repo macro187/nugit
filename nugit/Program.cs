@@ -198,7 +198,7 @@ Restore(Queue<string> args)
         throw new UserException("No .nugit.lock file present");
     }
 
-    DependencyTraverser.TraverseLock(repository, !exact);
+    DependencyTraverser.Restore(repository, exact);
 
     return 0;
 }
@@ -215,7 +215,7 @@ Update(Queue<string> args)
     var repository = WhereAmI();
     if (repository == null) throw new UserException("Not in a repository");
 
-    DependencyTraverser.Traverse(repository, false, false);
+    DependencyTraverser.Update(repository);
 
     return 0;
 }
@@ -233,7 +233,15 @@ Install(Queue<string> args)
     var repository = WhereAmI();
     if (repository == null) throw new UserException("Not in a repository");
 
-    Installer.Install(repository);
+    if (!repository.HasDotNuGitLock())
+    {
+        Trace.TraceError("No .nugit.lock file present, 'nugit update' to create it");
+        throw new UserException("No .nugit.lock file present");
+    }
+
+    DependencyTraverser.Restore(repository, true);
+    var dependencies = repository.ReadDotNuGitLock();
+    Installer.Install(repository, dependencies);
 
     return 0;
 }

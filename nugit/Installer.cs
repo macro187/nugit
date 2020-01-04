@@ -34,14 +34,13 @@ NuGitFolderPrefix = "nugit-";
 /// </summary>
 ///
 public static void
-Install(NuGitRepository repository)
+Install(NuGitRepository repository, IEnumerable<Dependency> dependencies)
 {
     Guard.NotNull(repository, nameof(repository));
+    Guard.NotNull(dependencies, nameof(dependencies));
 
     var sln = repository.FindVisualStudioSolution();
     if (sln == null) throw new UserException("No Visual Studio solution found in repo");
-
-    var repoNames = DependencyTraverser.GetAllDependencies(repository, false);
 
     var oldFolderIds =
         sln.SolutionFolders
@@ -50,11 +49,12 @@ Install(NuGitRepository repository)
 
     DeleteNuGitFolders(sln);
 
-    foreach (var repoName in repoNames)
+    foreach (var dependency in dependencies)
     {
-        var folderName = NuGitFolderPrefix + repoName;
+        var name = dependency.Url.RepositoryName;
+        var folderName = NuGitFolderPrefix + name;
         oldFolderIds.TryGetValue(folderName, out string folderId);
-        Install(repository, sln, repoName, folderName, folderId);
+        Install(repository, sln, name, folderName, folderId);
     }
 
     sln.Save();
@@ -81,12 +81,10 @@ Install(
     var dependencySln = dependencyRepository.FindVisualStudioSolution();
     if (dependencySln == null) return;
 
-    var dependencySlnDir = Path.GetDirectoryName(dependencySln.Path);
-
     var dependencyProjects = FindDependencyProjects(dependencyRepository, dependencySln);
     if (dependencyProjects.Count == 0) return;
 
-    using (LogicalOperation.Start("Installing projects from " + dependencySln.Path))
+    using (LogicalOperation.Start($"Installing projects from {dependencyName}"))
     {
         // TODO Consider configurations in each individual dependency project, not just the solution
         var configurationsInCommon =
@@ -100,11 +98,10 @@ Install(
                 : sln.AddSolutionFolder(folderName);
 
         foreach (var project in dependencyProjects)
+        using (LogicalOperation.Start($"Installing {project.Name}"))
         {
             var projectLocalPath =
                 PathExtensions.GetPathFromAncestor(project.AbsoluteLocation, dependencyRepository.Path);
-
-            Trace.TraceInformation("Installing " + projectLocalPath);
 
             //
             // Add reference to the dependency project

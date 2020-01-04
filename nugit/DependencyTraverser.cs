@@ -36,85 +36,12 @@ DependencyTraverser
 {
 
 
-/// <summary>
-/// Get a list of a repository's full dependency graph in breadth-first order
-/// </summary>
-///
-/// <param name="isLoose">
-/// If using frozen dependency information from a lockfile, whether to accept dependencies that are already checked out
-/// to the frozen version OR NEWER
-/// </param>
-///
-public static IList<GitRepositoryName>
-GetAllDependencies(NuGitRepository repository, bool isLoose)
-{
-    using (LogicalOperation.Start("Calculating dependencies"))
-    {
-        var names = new List<GitRepositoryName>();
-        Traverse(repository, (d,r) => names.Add(r.Name), true, isLoose);
-        return names;
-    }
-}
-
-
-/// <summary>
-/// Traverse a repository's dependencies
-/// </summary>
-///
-/// <param name="useLock">
-/// Whether to use frozen dependency information in the lockfile, if present
-/// </param>
-///
-/// <param name="isLoose">
-/// If using frozen dependency information from a lockfile, whether to accept dependencies that are already checked out
-/// to the frozen version OR NEWER
-/// </param>
-///
 public static void
-Traverse(NuGitRepository repository, bool useLock, bool isLoose)
-{
-    Traverse(repository, (d,r) => {}, useLock, isLoose);
-}
-
-
-/// <summary>
-/// Traverse a repository's dependencies, performing an action as each is visited
-/// </summary>
-///
-/// <remarks>
-/// Each dependency is visited exactly once.
-/// </remarks>
-///
-/// <param name="onVisited">
-/// An action to invoke for each repository encountered during the descent through the dependency graph, at
-/// which time the correct version of the repository itself will be available but its transitive dependencies
-/// will not
-/// </param>
-///
-/// <param name="useLock">
-/// Whether to use frozen dependency information in the lockfile, if present
-/// </param>
-///
-/// <param name="isLoose">
-/// If using frozen dependency information from a lockfile, whether to accept dependencies that are already checked out
-/// to the frozen version OR NEWER
-/// </param>
-///
-public static void
-Traverse(NuGitRepository repository, Action<Dependency,NuGitRepository> onVisited, bool useLock, bool isLoose)
+Update(NuGitRepository repository)
 {
     if (repository == null) throw new ArgumentNullException("repository");
 
-    IList<LockDependency> lockDependencies;
-
-    if (useLock && repository.HasDotNuGitLock())
-    {
-        TraverseLock(repository, repository.ReadDotNuGitLock(), onVisited, isLoose);
-        return;
-    }
-
-    lockDependencies = new List<LockDependency>();
-
+    var lockDependencies = new List<LockDependency>();
     Traverse(
         repository.Workspace,
         repository.ReadDotNuGit().Dependencies,
@@ -122,33 +49,18 @@ Traverse(NuGitRepository repository, Action<Dependency,NuGitRepository> onVisite
         new Dictionary<GitRepositoryName, GitCommitName>() { { repository.Name, new GitCommitName("HEAD") } },
         new HashSet<GitRepositoryName>() { repository.Name },
         (d,r) => {
-            onVisited(d,r);
             lockDependencies.Add(new LockDependency(d.Url, d.CommitName, r.GetCommitId()));
-            }
-        );
+        });
 
     repository.WriteDotNuGitLock(lockDependencies);
 }
 
 
 public static void
-TraverseLock(NuGitRepository repository, bool isLoose)
-{
-    if (repository == null) throw new ArgumentNullException("repository");
-    var lockDependencies = repository.ReadDotNuGitLock();
-    TraverseLock(repository, lockDependencies, (_,__) => {}, isLoose);
-}
-
-
-static void
-TraverseLock(
-    NuGitRepository repository,
-    IList<LockDependency> lockDependencies,
-    Action<Dependency,NuGitRepository> onVisited,
-    bool isLoose
-)
+Restore(NuGitRepository repository, bool exact)
 {
     var workspace = repository.Workspace;
+    var lockDependencies = repository.ReadDotNuGitLock();
 
     foreach (var d in lockDependencies)
     using (LogicalOperation.Start($"Restoring {d.Url.RepositoryName} to {d.CommitName} ({d.CommitId})"))
@@ -168,19 +80,19 @@ TraverseLock(
         var hasUncommittedChanges = r.HasUncommittedChanges();
         var isCommitNameAtCommitId = r.GetCommitId(d.CommitName) == d.CommitId;
 
-        if (isLoose && isCheckedOutToExact && hasUncommittedChanges)
+        if (!exact && isCheckedOutToExact && hasUncommittedChanges)
         {
             Trace.TraceInformation($"Already checked out with uncommitted changes");
         }
-        else if (isLoose && isCheckedOutToExact)
+        else if (!exact && isCheckedOutToExact)
         {
             Trace.TraceInformation($"Already checked out");
         }
-        else if (isLoose && isCheckedOutToDescendent && hasUncommittedChanges)
+        else if (!exact && isCheckedOutToDescendent && hasUncommittedChanges)
         {
             Trace.TraceInformation($"Already checked out to descendent with uncommitted changes");
         }
-        else if (isLoose && isCheckedOutToDescendent)
+        else if (!exact && isCheckedOutToDescendent)
         {
             Trace.TraceInformation($"Already checked out to descendent");
         }
@@ -201,8 +113,6 @@ TraverseLock(
         {
             CheckOut(r, d.CommitId);
         }
-
-        onVisited(d, r);
     }
 }
 
@@ -248,8 +158,27 @@ Traverse(
         // First visit wins
         //
         if (checkedOutCommit == null)
+        using (LogicalOperation.Start($"Restoring {d.Url.RepositoryName} to {d.CommitName}"))
         {
-            CheckOut(repo, commit);
+            var commitId = repo.GetCommitId(commit);
+            var headId = repo.GetCommitId();
+            var isCheckedOutToCommit = headId == commitId;
+            var hasUncommittedChanges = repo.HasUncommittedChanges();
+
+            if (repo.HasUncommittedChanges())
+            {
+                Trace.TraceError("Uncommitted changes");
+                throw new UserException($"Uncommitted changes in {name}");
+            }
+            else if (isCheckedOutToCommit)
+            {
+                Trace.TraceInformation($"Already checked out");
+            }
+            else
+            {
+                CheckOut(repo, commit);
+            }
+
             checkedOut.Add(name, commit);
             visited.Add(name);
             onVisited(d, repo);
