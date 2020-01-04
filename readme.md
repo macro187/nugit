@@ -40,11 +40,11 @@ Specify URLs of other Git repositories you require in your own `.nugit` file:
     https://example.com/repob.git#v2
     ...
 
-Based on that information, the nugit `restore` command makes all required
+Based on that information, the nugit `update` command makes all required
 repositories available as peers to your own, at the required revisions,
 including transitive dependencies:
 
-    C:\workspace\myrepo> nugit restore
+    C:\workspace\myrepo> nugit update
 
     ...
 
@@ -55,6 +55,11 @@ including transitive dependencies:
     repoc
     repod
     myrepo
+
+While doing so, nugit records the sequence of repositories and commit
+identifiers in a `.nugit.lock` file, which is used by the nugit `restore`
+command to restore the repositories to the _exact_ same revisions at any time in
+the future, regardless of any changes that may have occurred.
 
 
 Visual Studio Projects
