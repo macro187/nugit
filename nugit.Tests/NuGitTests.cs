@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MacroDiagnostics;
 using MacroGit;
@@ -13,7 +14,9 @@ namespace nugit.Tests
     public class NuGitTests
     {
 
-        #if NET461
+        #if NET7_0
+        const string frameworkMoniker = "net7.0";
+        #elif NET461
         const string frameworkMoniker = "net461";
         #elif NETCOREAPP2_0
         const string frameworkMoniker = "netcoreapp2.0";
@@ -43,6 +46,7 @@ namespace nugit.Tests
         static readonly string wrkDirC = Path.Combine(wrkroot, "c");
         static GitRepository wrkRepoA;
 
+
         //
         // nugit.exe under test
         //
@@ -51,7 +55,9 @@ namespace nugit.Tests
             "..", "..", "..", "..",
             "nugit", "bin", "Debug",
             frameworkMoniker,
-            "nugit.exe"));
+            RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? "nugit.exe"
+                : "nugit"));
 
 
         /// <summary>

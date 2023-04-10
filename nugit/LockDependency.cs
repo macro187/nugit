@@ -18,7 +18,7 @@ LockDependency
 
 
 public
-LockDependency(GitUrl url, GitCommitName commitName, GitCommitName commitId)
+LockDependency(GitUrl url, GitRev commitName, GitRev commitId)
     : base(url, commitName)
 {
     Guard.NotNull(commitId, nameof(commitId));
@@ -31,7 +31,7 @@ LockDependency(GitUrl url, GitCommitName commitName, GitCommitName commitId)
 /// Exact required commit unique ID
 /// </summary>
 ///
-public GitCommitName
+public GitRev
 CommitId
 {
     get;

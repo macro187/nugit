@@ -46,7 +46,7 @@ Update(NuGitRepository repository)
         repository.Workspace,
         repository.ReadDotNuGit().Dependencies,
         repository,
-        new Dictionary<GitRepositoryName, GitCommitName>() { { repository.Name, new GitCommitName("HEAD") } },
+        new Dictionary<GitRepositoryName, GitRev>() { { repository.Name, new GitRev("HEAD") } },
         new HashSet<GitRepositoryName>() { repository.Name },
         (d,r) => {
             lockDependencies.Add(new LockDependency(d.Url, d.CommitName, r.GetCommitId()));
@@ -74,7 +74,7 @@ Restore(NuGitRepository repository, bool exact)
             r = workspace.GetRepository(name);
         }
 
-        var head = r.GetCommitId(new GitCommitName("HEAD"));
+        var head = r.GetCommitId(new GitRev("HEAD"));
         var isCheckedOutToExact = head == d.CommitId;
         var isCheckedOutToDescendent = r.IsAncestor(d.CommitId, head);
         var hasUncommittedChanges = r.HasUncommittedChanges();
@@ -122,7 +122,7 @@ Traverse(
     NuGitWorkspace workspace,
     IEnumerable<Dependency> dependencies,
     NuGitRepository requiredBy,
-    IDictionary<GitRepositoryName,GitCommitName> checkedOut,
+    IDictionary<GitRepositoryName,GitRev> checkedOut,
     ISet<GitRepositoryName> visited,
     Action<Dependency,NuGitRepository> onVisited
     )
@@ -235,7 +235,7 @@ Clone(string parentPath, GitUrl url)
 
 
 static void
-CheckOut(NuGitRepository repository, GitCommitName commit)
+CheckOut(NuGitRepository repository, GitRev commit)
 {
     using (LogicalOperation.Start($"Checking out {commit}"))
     {

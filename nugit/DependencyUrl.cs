@@ -97,12 +97,12 @@ DependencyUrl(string urlString)
         throw new FormatException("Not a valid Git repository URL", fe);
     }
 
-    GitCommitName commitName = new GitCommitName(DefaultCommitName);
+    GitRev commitName = new GitRev(DefaultCommitName);
     if (Fragment.Length > 1)
     {
         try
         {
-            commitName = new GitCommitName(Fragment.Substring(1));
+            commitName = new GitRev(Fragment.Substring(1));
         }
         catch (FormatException fe)
         {

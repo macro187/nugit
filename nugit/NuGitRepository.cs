@@ -145,10 +145,10 @@ ReadDotNuGitLock()
                 fe);
         }
 
-        GitCommitName commitName;
+        GitRev commitName;
         try
         {
-            commitName = new GitCommitName(a[1]);
+            commitName = new GitRev(a[1]);
         }
         catch (FormatException fe)
         {
@@ -159,10 +159,10 @@ ReadDotNuGitLock()
                 fe);
         }
         
-        GitCommitName commitId;
+        GitRev commitId;
         try
         {
-            commitId = new GitCommitName(a[2]);
+            commitId = new GitRev(a[2]);
         }
         catch (FormatException fe)
         {

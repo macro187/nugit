@@ -17,7 +17,7 @@ Dependency
 
 
 public
-Dependency(GitUrl url, GitCommitName commitName)
+Dependency(GitUrl url, GitRev commitName)
 {
     Guard.NotNull(url, nameof(url));
     Guard.NotNull(commitName, nameof(commitName));
@@ -42,7 +42,7 @@ Url
 /// Required commit
 /// </summary>
 ///
-public GitCommitName
+public GitRev
 CommitName
 {
     get;
