@@ -1,5 +1,5 @@
 . $HOTBOX/lib/spec.sh
 
 
-inherit alpine-dotnet-builder
+inherit dotnet-builder
 feature git
