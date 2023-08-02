@@ -151,6 +151,7 @@ namespace nugit.Tests
             var dotNugit = Path.Combine(dir, ".nugit");
 
             var repo = GitRepository.Init(dir);
+            repo.Config("user.email", "test@example.com");
 
             if (dependencies.Length > 0)
             {
