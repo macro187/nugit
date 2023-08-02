@@ -70,9 +70,18 @@ namespace nugit.Tests
             if (Directory.Exists(srcroot)) NukeDirectory(srcroot);
             if (Directory.Exists(wrkroot)) NukeDirectory(wrkroot);
             Directory.CreateDirectory(srcroot);
-            BuildRepo("a", new GitUrl[] { srcUrlB });
-            BuildRepo("b", new GitUrl[] { srcUrlC });
-            BuildRepo("c", new GitUrl[] {});
+            try
+            {
+                BuildRepo("a", new GitUrl[] { srcUrlB });
+                BuildRepo("b", new GitUrl[] { srcUrlC });
+                BuildRepo("c", new GitUrl[] {});
+            }
+            catch (GitException ge)
+            {
+                context.WriteLine(ge.CommandLine);
+                context.WriteLine(ge.Output);
+                throw;
+            }
         }
 
 
