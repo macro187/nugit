@@ -1,5 +1,6 @@
 . $HOTBOX/lib/spec.sh
 
 
-inherit dotnet-builder
+include cook-dotnet-builder
+
 feature git
